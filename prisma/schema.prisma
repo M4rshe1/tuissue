@@ -1,0 +1,294 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  name               String
+  email              String
+  emailVerified      Boolean   @default(false)
+  mustChangePassword Boolean   @default(false)
+  image              String?
+  sessions           Session[]
+  accounts           Account[]
+  deletedAt          DateTime?
+  role               String?
+  banned             Boolean?  @default(false)
+  banReason          String?
+  banExpires         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  userProjects UserProject[]
+  userIssues   UserIssue[]
+  attachments  Attachment[]
+  userSettings UserSettings[]
+  issueAudits  IssueAudit[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  impersonatedBy String?
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("verification")
+}
+
+model Project {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  image       String?
+  visibility  String  @default("PUBLIC") // PUBLIC, PRIVATE, PROTECTED
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  issues       Issue[]
+  customFields CustomField[]
+  userProjects UserProject[]
+  issueStates  IssueState[]
+
+  @@index([name, visibility, createdAt])
+}
+
+model IssueState {
+  id        String  @id @default(cuid())
+  name      String
+  color     String
+  isClosing Boolean @default(false)
+  order     Int     @default(0)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  issues Issue[]
+}
+
+model Issue {
+  id        String     @id @default(cuid())
+  number    Int
+  title     String
+  summary   String
+  stateId   String
+  state     IssueState @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments          Comment[]
+  attachments       Attachment[]
+  customFieldValues CustomFieldValue[]
+  userIssues        UserIssue[]
+  dependencies      IssueDependency[]  @relation("IssueDependency")
+  blocking          IssueDependency[]  @relation("BlockingIssue")
+  issueAudits       IssueAudit[]
+
+  @@index([number, projectId, createdAt])
+}
+
+model IssueDependency {
+  id           String @id @default(cuid())
+  issueId      String @unique
+  issue        Issue  @relation("IssueDependency", fields: [issueId], references: [id], onDelete: Cascade)
+  dependencyId String @unique
+  dependency   Issue  @relation("BlockingIssue", fields: [dependencyId], references: [id], onDelete: Cascade)
+
+  @@unique([issueId, dependencyId])
+}
+
+model Comment {
+  id      String @id @default(cuid())
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  issueId String
+  issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId, createdAt])
+}
+
+model Attachment {
+  id     String  @id @default(cuid())
+  url    String
+  name   String
+  size   Int     @default(0)
+  type   String  @default("IMAGE") // IMAGE, VIDEO, AUDIO, DOCUMENT, OTHER, TEXT
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  issueId String
+  issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+}
+
+model Settings {
+  id    String @id @default(cuid())
+  key   String
+  value String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CustomField {
+  id                 String   @id @default(cuid())
+  type               String   @default("TEXT") // TEXT, TEXT_AREA, NUMBER, DATE, BOOLEAN, SELECT, MULTI_SELECT, USER, FILE
+  label              String
+  defaultValue       String?
+  description        String?
+  dependencyOperator String?  @default("AND") // AND, OR
+  required           Boolean  @default(false)
+  scope              String // PROJECT, GLOBAL
+  projectId          String?
+  project            Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customFieldOptions      CustomFieldOption[]
+  customFieldValues       CustomFieldValue[]
+  customFieldDependencies CustomFieldDependency[] @relation("CustomFieldDepending")
+  customFieldsDepending   CustomFieldDependency[] @relation("CustomFieldDependency")
+}
+
+model CustomFieldValue {
+  id            String      @id @default(cuid())
+  value         String
+  issueId       String
+  issue         Issue       @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  customFieldId String
+  customField   CustomField @relation(fields: [customFieldId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CustomFieldDependency {
+  id                      String      @id @default(cuid())
+  condition               String // EQUALS, NOT_EQUALS, CONTAINS, NOT_CONTAINS, IS_EMPTY, IS_NOT_EMPTY
+  value                   String
+  customField             CustomField @relation("CustomFieldDepending", fields: [customFieldId], references: [id], onDelete: Cascade)
+  customFieldId           String
+  customFieldDependency   CustomField @relation("CustomFieldDependency", fields: [customFieldDependencyId], references: [id], onDelete: Cascade)
+  customFieldDependencyId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CustomFieldOption {
+  id            String      @id @default(cuid())
+  value         String
+  customFieldId String
+  customField   CustomField @relation(fields: [customFieldId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserProject {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  role      String  @default("VIEWER") // OWNER, ADMIN, QA, CONTRIBUTOR, VIEWER, REPORTER
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserIssue {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issueId String
+  issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  role    String @default("ASSIGNEE") // ASSIGNEE, REVIEWER, WATCHER
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserSettings {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key    String
+  value  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model IssueAudit {
+  id        String   @id @default(cuid())
+  issueId   String
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  oldValue  String?
+  newValue  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
