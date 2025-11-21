@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "~/components/ui/switch";
+import { Switch } from "@/components/ui/switch";
 import DatePicker from "@/components/ui/date-picker";
 import { SelectWithSearch } from "@/components/select-with-search";
 import {
@@ -24,14 +24,14 @@ import {
 } from "@/components/user-search-input";
 import { toast } from "sonner";
 import { Copy, ChevronLeft, ChevronRight, InfoIcon } from "lucide-react";
-import { Slider } from "~/components/ui/slider";
-import PasswordInput from "~/components/password-input";
-import NumberInput from "~/components/number-input";
+import { Slider } from "@/components/ui/slider";
+import PasswordInput from "@/components/password-input";
+import NumberInput from "@/components/number-input";
 import {
   Stepper,
   StepperIndicator,
   StepperItem,
-} from "~/components/ui/stepper";
+} from "@/components/ui/stepper";
 import {
   OutOfField,
   type OutOfFieldConfig,
@@ -43,7 +43,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "~/lib/utils";
+import { cn } from "@/lib/utils";
 
 export type {
   OutOfFieldConfig,

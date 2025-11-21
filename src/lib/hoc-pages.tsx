@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import type { ComponentType } from "react";
-import type { Session } from "~/lib/auth";
+import type { Session } from "@/lib/auth";
 import { db } from "./db";
-import { ErrorState } from "~/components/error-state";
+import { ErrorState } from "@/components/error-state";
 import { getSession } from "@/lib/session";
 import { headers } from "next/headers";
 
@@ -40,7 +40,8 @@ export const withAuth = <P extends object>(
     // (except if already on the password change page)
     if (session && session.user.mustChangePassword) {
       const headersList = await headers();
-      const pathname = headersList.get("x-pathname") || headersList.get("referer") || "";
+      const pathname =
+        headersList.get("x-pathname") || headersList.get("referer") || "";
       if (!pathname.includes("/auth/change-password")) {
         redirect("/auth/change-password");
       }

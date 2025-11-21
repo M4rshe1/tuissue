@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { cn } from "~/lib/utils";
+import { cn } from "@/lib/utils";
 
 export default function PasswordInput({
   className,

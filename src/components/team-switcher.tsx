@@ -12,22 +12,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { COLORS, OPACITY, sortTeams } from "~/lib/team";
-import { authClient } from "~/lib/auth-client";
+import { COLORS, OPACITY, sortTeams } from "@/lib/team";
+import { authClient } from "@/lib/auth-client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
-import { useCreateTeamMutation, useUserTeamsQuery } from "~/queries/team";
+import { useCreateTeamMutation, useUserTeamsQuery } from "@/queries/team";
 import Link from "next/link";
-import { createTeamDialogConfig } from "~/dialogs/create-team";
+import { createTeamDialogConfig } from "@/dialogs/create-team";
 import type { FormDialogConfig } from "./form-dialog";
-import { useFormDialog } from "~/providers/form-dialog-provider";
-import { useJoinTeamWithInvitationMutation } from "~/queries/team-invitation";
-import { acceptInvitationDialogConfig } from "~/dialogs/accept-invitation";
+import { useFormDialog } from "@/providers/form-dialog-provider";
+import { useJoinTeamWithInvitationMutation } from "@/queries/team-invitation";
+import { acceptInvitationDialogConfig } from "@/dialogs/accept-invitation";
 import { Button } from "./ui/button";
-import { useSessionQuery } from "~/queries/session";
+import { useSessionQuery } from "@/queries/session";
 import { toast } from "sonner";
-import { revalidateAny } from "~/lib/get-query-client";
+import { revalidateAny } from "@/lib/get-query-client";
 
 const MAX_TEAMS = 3;
 

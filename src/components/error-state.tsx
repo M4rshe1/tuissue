@@ -3,8 +3,8 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import { Button } from "~/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 type ErrorStateProps = {
   title?: string;
