@@ -11,7 +11,13 @@ export const USER_PROJECT_ROLE = {
   QA: "QA", // can see, edit and create issues
   CONTRIBUTOR: "CONTRIBUTOR", // can see, edit and create issues
   VIEWER: "VIEWER", // can see issues and comments
-  REPORTER: "REPORTER", // can see, edit and create issues
+  REPORTER: "REPORTER", // can see and create issues but not edit there own issues
+} as const;
+
+export const SETTING_SCOPE = {
+  GLOBAL: "GLOBAL",
+  PROJECT: "PROJECT",
+  USER: "USER",
 } as const;
 
 export const USER_ISSUE_ROLE = {

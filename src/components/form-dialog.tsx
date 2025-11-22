@@ -342,7 +342,7 @@ export function FormDialog({
     }
   };
 
-  const handleSubmit = form.handleSubmit((values) => {
+  const handleSubmit = form.handleSubmit((values: Record<string, any>) => {
     onSubmit(values);
     form.reset();
     setCurrentPageIndex(0);

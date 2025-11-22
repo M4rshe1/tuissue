@@ -28,8 +28,8 @@ model User {
   userProjects UserProject[]
   userIssues   UserIssue[]
   attachments  Attachment[]
-  userSettings UserSettings[]
   issueAudits  IssueAudit[]
+  settings     Settings[]
 
   @@unique([email])
   @@map("user")
@@ -98,23 +98,46 @@ model Project {
   customFields CustomField[]
   userProjects UserProject[]
   issueStates  IssueState[]
+  settings     Settings[]
 
   @@index([name, visibility, createdAt])
 }
 
 model IssueState {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   name      String
   color     String
-  isClosing Boolean @default(false)
-  order     Int     @default(0)
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  isClosing Boolean  @default(false)
+  order     Int      @default(0)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   issues Issue[]
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String
+  color String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  issueTags IssueTag[]
+}
+
+model IssueTag {
+  id      String @id @default(cuid())
+  issueId String
+  issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  tagId   String
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Issue {
@@ -137,6 +160,7 @@ model Issue {
   dependencies      IssueDependency[]  @relation("IssueDependency")
   blocking          IssueDependency[]  @relation("BlockingIssue")
   issueAudits       IssueAudit[]
+  issueTags         IssueTag[]
 
   @@index([number, projectId, createdAt])
 }
@@ -181,9 +205,14 @@ model Attachment {
 }
 
 model Settings {
-  id    String @id @default(cuid())
-  key   String
-  value String
+  id        String   @id @default(cuid())
+  key       String
+  value     String
+  scope     String // GLOBAL, PROJECT, USER
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -194,6 +223,7 @@ model CustomField {
   type               String   @default("TEXT") // TEXT, TEXT_AREA, NUMBER, DATE, BOOLEAN, SELECT, MULTI_SELECT, USER, FILE
   label              String
   defaultValue       String?
+  isObsolete         Boolean  @default(false)
   description        String?
   dependencyOperator String?  @default("AND") // AND, OR
   required           Boolean  @default(false)
@@ -224,7 +254,7 @@ model CustomFieldValue {
 
 model CustomFieldDependency {
   id                      String      @id @default(cuid())
-  condition               String // EQUALS, NOT_EQUALS, CONTAINS, NOT_CONTAINS, IS_EMPTY, IS_NOT_EMPTY
+  condition               String
   value                   String
   customField             CustomField @relation("CustomFieldDepending", fields: [customFieldId], references: [id], onDelete: Cascade)
   customFieldId           String
@@ -263,18 +293,7 @@ model UserIssue {
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   issueId String
   issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
-  role    String @default("ASSIGNEE") // ASSIGNEE, REVIEWER, WATCHER
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model UserSettings {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  key    String
-  value  String
+  role    String @default("ASSIGNEE") // ASSIGNEE, REVIEWER, WATCHER, CREATOR
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
