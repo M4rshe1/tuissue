@@ -73,11 +73,6 @@ export const CUSTOM_FIELD_DEPENDENCY_OPERATOR = {
   OR: "OR",
 } as const;
 
-export const CUSTOM_FIELD_SCOPE = {
-  PROJECT: "PROJECT",
-  GLOBAL: "GLOBAL",
-} as const;
-
 export const ISSUE_AUDIT_ACTION = {
   CREATE: "CREATE",
   UPDATE: "UPDATE",

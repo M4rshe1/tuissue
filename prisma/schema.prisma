@@ -30,8 +30,12 @@ model User {
   attachments  Attachment[]
   issueAudits  IssueAudit[]
   settings     Settings[]
+  comments     Comment[]     @relation("CommentAuthor")
 
   @@unique([email])
+  @@index([deletedAt]) // For soft delete queries
+  @@index([email, deletedAt]) // For authentication queries
+  @@index([banned, banExpires]) // For ban checks
   @@map("user")
 }
 
@@ -49,6 +53,8 @@ model Session {
   impersonatedBy String?
 
   @@unique([token])
+  @@index([userId, expiresAt]) // For session cleanup queries
+  @@index([expiresAt]) // For expired session cleanup
   @@map("session")
 }
 
@@ -69,6 +75,8 @@ model Account {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([providerId, accountId]) // Prevent duplicate OAuth accounts
+  @@index([userId, providerId]) // For user account lookups
   @@map("account")
 }
 
@@ -81,6 +89,8 @@ model Verification {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([identifier, value]) // For verification lookups
+  @@index([expiresAt]) // For cleanup of expired verifications
   @@map("verification")
 }
 
@@ -100,7 +110,10 @@ model Project {
   issueStates  IssueState[]
   settings     Settings[]
 
-  @@index([name, visibility, createdAt])
+  @@index([visibility, createdAt]) // For filtering by visibility
+  @@index([name]) // For search and sorting
+  @@index([createdAt]) // For chronological sorting
+  @@map("project")
 }
 
 model IssueState {
@@ -116,6 +129,10 @@ model IssueState {
   updatedAt DateTime @updatedAt
 
   issues Issue[]
+
+  @@index([projectId, order]) // For ordered state queries
+  @@index([projectId, isClosing]) // For filtering closing states
+  @@map("issue_state")
 }
 
 model Tag {
@@ -127,6 +144,10 @@ model Tag {
   updatedAt DateTime @updatedAt
 
   issueTags IssueTag[]
+
+  @@unique([name]) // Prevent duplicate tag names
+  @@index([name]) // For tag search
+  @@map("tag")
 }
 
 model IssueTag {
@@ -138,6 +159,11 @@ model IssueTag {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([issueId, tagId]) // Prevent duplicate tag assignments
+  @@index([issueId]) // For issue tag queries
+  @@index([tagId]) // For tag usage queries
+  @@map("issue_tag")
 }
 
 model Issue {
@@ -162,22 +188,36 @@ model Issue {
   issueAudits       IssueAudit[]
   issueTags         IssueTag[]
 
-  @@index([number, projectId, createdAt])
+  @@unique([projectId, number]) // Ensure unique issue numbers per project
+  @@index([projectId, stateId]) // For filtering issues by project and state
+  @@index([projectId, createdAt]) // For chronological project issues
+  @@index([stateId]) // For state-based queries
+  @@index([createdAt]) // For chronological sorting
+  @@index([updatedAt]) // For recently updated queries
+  @@map("issue")
 }
 
 model IssueDependency {
   id           String @id @default(cuid())
-  issueId      String @unique
+  issueId      String
   issue        Issue  @relation("IssueDependency", fields: [issueId], references: [id], onDelete: Cascade)
-  dependencyId String @unique
+  dependencyId String
   dependency   Issue  @relation("BlockingIssue", fields: [dependencyId], references: [id], onDelete: Cascade)
 
-  @@unique([issueId, dependencyId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([issueId, dependencyId]) // Prevent duplicate dependencies
+  @@index([issueId]) // For issue dependency queries
+  @@index([dependencyId]) // For blocking issue queries
+  @@map("issue_dependency")
 }
 
 model Comment {
-  id      String @id @default(cuid())
+  id      String  @id @default(cuid())
   content String
+  userId  String? // Track comment author
+  user    User?   @relation("CommentAuthor", fields: [userId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -185,23 +225,31 @@ model Comment {
   issueId String
   issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
 
-  @@index([issueId, createdAt])
+  @@index([issueId, createdAt]) // For chronological comment queries
+  @@index([userId]) // For user comment queries
+  @@map("comment")
 }
 
 model Attachment {
-  id     String  @id @default(cuid())
-  url    String
-  name   String
-  size   Int     @default(0)
-  type   String  @default("IMAGE") // IMAGE, VIDEO, AUDIO, DOCUMENT, OTHER, TEXT
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id       String  @id @default(cuid())
+  url      String
+  name     String
+  size     Int     @default(0)
+  type     String  @default("IMAGE") // IMAGE, VIDEO, AUDIO, DOCUMENT, OTHER, TEXT
+  mimeType String? // MIME type for better file handling
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   issueId String
   issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId, type]) // For filtering attachments by type
+  @@index([userId]) // For user attachment queries
+  @@index([createdAt]) // For chronological sorting
+  @@map("attachment")
 }
 
 model Settings {
@@ -216,6 +264,12 @@ model Settings {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([scope, key, projectId, userId]) // Ensure unique settings per scope
+  @@index([scope, key]) // For global settings lookup
+  @@index([projectId, key]) // For project settings lookup
+  @@index([userId, key]) // For user settings lookup
+  @@map("settings")
 }
 
 model CustomField {
@@ -227,7 +281,7 @@ model CustomField {
   description        String?
   dependencyOperator String?  @default("AND") // AND, OR
   required           Boolean  @default(false)
-  scope              String // PROJECT, GLOBAL
+  order              Int      @default(0) // For field ordering
   projectId          String?
   project            Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
@@ -238,6 +292,10 @@ model CustomField {
   customFieldValues       CustomFieldValue[]
   customFieldDependencies CustomFieldDependency[] @relation("CustomFieldDepending")
   customFieldsDepending   CustomFieldDependency[] @relation("CustomFieldDependency")
+
+  @@index([projectId, isObsolete, order]) // For ordered field queries
+  @@index([projectId]) // For project field queries
+  @@map("custom_field")
 }
 
 model CustomFieldValue {
@@ -250,6 +308,11 @@ model CustomFieldValue {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([issueId, customFieldId]) // Ensure one value per field per issue
+  @@index([issueId]) // For issue custom field queries
+  @@index([customFieldId, value]) // For filtering by custom field value
+  @@map("custom_field_value")
 }
 
 model CustomFieldDependency {
@@ -263,6 +326,11 @@ model CustomFieldDependency {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([customFieldId, customFieldDependencyId, condition, value]) // Prevent duplicate dependencies
+  @@index([customFieldId]) // For field dependency queries
+  @@index([customFieldDependencyId]) // For reverse dependency queries
+  @@map("custom_field_dependency")
 }
 
 model CustomFieldOption {
@@ -273,6 +341,9 @@ model CustomFieldOption {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([customFieldId, value]) // Prevent duplicate options
+  @@map("custom_field_option")
 }
 
 model UserProject {
@@ -285,6 +356,12 @@ model UserProject {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([userId, projectId]) // Prevent duplicate project memberships
+  @@index([userId]) // For user project queries
+  @@index([projectId, role]) // For project member queries by role
+  @@index([projectId]) // For project member queries
+  @@map("user_project")
 }
 
 model UserIssue {
@@ -297,6 +374,13 @@ model UserIssue {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([userId, issueId, role]) // Prevent duplicate assignments with same role
+  @@index([userId, role]) // For user issue queries by role
+  @@index([issueId, role]) // For issue participant queries by role
+  @@index([issueId]) // For issue participant queries
+  @@index([userId]) // For user issue queries
+  @@map("user_issue")
 }
 
 model IssueAudit {
@@ -306,8 +390,16 @@ model IssueAudit {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   action    String
+  field     String? // Track which field was changed
   oldValue  String?
   newValue  String?
+  metadata  Json?    @default("{}") // Extensible metadata for audit details
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([issueId, createdAt]) // For chronological audit trail
+  @@index([userId, createdAt]) // For user activity queries
+  @@index([action, createdAt]) // For action-based queries
+  @@index([issueId, action]) // For specific action queries on issues
+  @@map("issue_audit")
 }
