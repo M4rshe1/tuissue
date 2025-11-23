@@ -95,11 +95,12 @@ model Verification {
 }
 
 model Project {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  image       String?
-  visibility  String  @default("PUBLIC") // PUBLIC, PRIVATE, PROTECTED
+  id                  String  @id @default(cuid())
+  name                String
+  description         String?
+  image               String?
+  inheritCustomFields Boolean @default(false)
+  visibility          String  @default("PUBLIC") // PUBLIC, SEMI_PUBLIC, PRIVATE, PROTECTED
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -107,7 +108,6 @@ model Project {
   issues       Issue[]
   customFields CustomField[]
   userProjects UserProject[]
-  issueStates  IssueState[]
   settings     Settings[]
 
   @@index([visibility, createdAt]) // For filtering by visibility
@@ -116,28 +116,9 @@ model Project {
   @@map("project")
 }
 
-model IssueState {
-  id        String   @id @default(cuid())
-  name      String
-  color     String
-  isClosing Boolean  @default(false)
-  order     Int      @default(0)
-  projectId String?
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  issues Issue[]
-
-  @@index([projectId, order]) // For ordered state queries
-  @@index([projectId, isClosing]) // For filtering closing states
-  @@map("issue_state")
-}
-
 model Tag {
   id    String @id @default(cuid())
-  name  String
+  name  String @unique
   color String
 
   createdAt DateTime @default(now())
@@ -145,8 +126,6 @@ model Tag {
 
   issueTags IssueTag[]
 
-  @@unique([name]) // Prevent duplicate tag names
-  @@index([name]) // For tag search
   @@map("tag")
 }
 
@@ -167,14 +146,12 @@ model IssueTag {
 }
 
 model Issue {
-  id        String     @id @default(cuid())
+  id        String  @id @default(cuid())
   number    Int
   title     String
   summary   String
-  stateId   String
-  state     IssueState @relation(fields: [stateId], references: [id], onDelete: Cascade)
   projectId String
-  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -189,9 +166,7 @@ model Issue {
   issueTags         IssueTag[]
 
   @@unique([projectId, number]) // Ensure unique issue numbers per project
-  @@index([projectId, stateId]) // For filtering issues by project and state
   @@index([projectId, createdAt]) // For chronological project issues
-  @@index([stateId]) // For state-based queries
   @@index([createdAt]) // For chronological sorting
   @@index([updatedAt]) // For recently updated queries
   @@map("issue")
@@ -274,8 +249,9 @@ model Settings {
 
 model CustomField {
   id                 String   @id @default(cuid())
-  type               String   @default("TEXT") // TEXT, TEXT_AREA, NUMBER, DATE, BOOLEAN, SELECT, MULTI_SELECT, USER, FILE
+  type               String   @default("TEXT") // TEXT, TEXT_AREA, NUMBER, DATE, BOOLEAN, SELECT, MULTI_SELECT, USER, FILE, STATE, LINK
   label              String
+  defaultShow        Boolean  @default(true)
   defaultValue       String?
   isObsolete         Boolean  @default(false)
   description        String?
@@ -334,10 +310,12 @@ model CustomFieldDependency {
 }
 
 model CustomFieldOption {
-  id            String      @id @default(cuid())
-  value         String
-  customFieldId String
-  customField   CustomField @relation(fields: [customFieldId], references: [id], onDelete: Cascade)
+  id             String      @id @default(cuid())
+  value          String
+  customFieldId  String
+  isIssueClosing Boolean     @default(false)
+  color          String?
+  customField    CustomField @relation(fields: [customFieldId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

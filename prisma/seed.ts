@@ -3,57 +3,46 @@ import { GLOBAL_SETTINGS } from "@/lib/settings/global";
 import { db } from "@/server/db";
 import { format } from "date-fns";
 
-async function createDefaultIssueStates() {
-  await db.issueState.createMany({
-    data: [
-      { name: "OPEN", color: "#FF0000", projectId: null, isClosing: false },
-      {
-        name: "IN PROGRESS",
-        color: "#FFFF00",
-        projectId: null,
-        isClosing: false,
-      },
-      {
-        name: "IN REVIEW",
-        color: "#0000FF",
-        projectId: null,
-        isClosing: false,
-      },
-      {
-        name: "RESOLVED - FIXED",
-        color: "#00FF00",
-        projectId: null,
-        isClosing: true,
-      },
-      {
-        name: "RESOLVED - WONT FIX",
-        color: "#00FF00",
-        projectId: null,
-        isClosing: true,
-      },
-      {
-        name: "RESOLVED - WORKS FOR ME",
-        color: "#00FF00",
-        projectId: null,
-        isClosing: true,
-      },
-      {
-        name: "DUPLICATE",
-        color: "#FF0000",
-        projectId: null,
-        isClosing: true,
-      },
-    ],
-  });
-}
-
 async function createCustomFields() {
+  await db.customField.create({
+    data: {
+      label: "State",
+      type: "STATE",
+      projectId: null,
+      required: true,
+      defaultShow: true,
+      defaultValue: "OPEN",
+      customFieldOptions: {
+        create: [
+          { value: "OPEN", color: "#FF0000", isIssueClosing: false },
+          { value: "IN PROGRESS", color: "#FFFF00", isIssueClosing: false },
+          { value: "IN REVIEW", color: "#0000FF", isIssueClosing: false },
+          {
+            value: "RESOLVED - FIXED",
+            color: "#00FF00",
+            isIssueClosing: true,
+          },
+          {
+            value: "RESOLVED - WONT FIX",
+            color: "#00FF00",
+            isIssueClosing: true,
+          },
+          {
+            value: "RESOLVED - WORKS FOR ME",
+            color: "#00FF00",
+            isIssueClosing: true,
+          },
+          { value: "DUPLICATE", color: "#FF0000", isIssueClosing: true },
+        ],
+      },
+    },
+  });
   await db.customField.create({
     data: {
       label: "Priority",
       type: "SELECT",
       projectId: null,
-      scope: "GLOBAL",
+      defaultShow: true,
       required: true,
       defaultValue: "1 - LOW",
       customFieldOptions: {
@@ -72,7 +61,7 @@ async function createCustomFields() {
       label: "Severity",
       type: "SELECT",
       projectId: null,
-      scope: "GLOBAL",
+      defaultShow: true,
       required: true,
       defaultValue: "1 - LOW",
       customFieldOptions: {
@@ -89,7 +78,6 @@ async function createCustomFields() {
       label: "Component",
       type: "SELECT",
       projectId: null,
-      scope: "GLOBAL",
       required: true,
       defaultValue: "Component",
       customFieldOptions: {
@@ -109,7 +97,6 @@ async function createCustomFields() {
       label: "Due Date",
       type: "DATE",
       projectId: null,
-      scope: "GLOBAL",
       required: true,
       defaultValue: format(new Date(), "yyyy-MM-dd"),
     },
@@ -119,7 +106,6 @@ async function createCustomFields() {
       label: "Type",
       type: "SELECT",
       projectId: null,
-      scope: "GLOBAL",
       required: true,
       defaultValue: "BUG",
       customFieldOptions: {
@@ -132,7 +118,6 @@ async function createCustomFields() {
       label: "Hardware",
       type: "SELECT",
       projectId: null,
-      scope: "GLOBAL",
       required: true,
       defaultValue: "LINUX",
       customFieldOptions: {
@@ -150,7 +135,6 @@ async function createCustomFields() {
       label: "Version",
       type: "DATE",
       projectId: null,
-      scope: "GLOBAL",
       required: true,
       defaultValue: format(new Date(), "yyyy-MM-dd"),
     },
@@ -160,7 +144,6 @@ async function createCustomFields() {
       label: "Fixed in Version",
       type: "DATE",
       projectId: null,
-      scope: "GLOBAL",
       required: true,
       defaultValue: format(new Date(), "yyyy-MM-dd"),
     },
@@ -182,7 +165,6 @@ async function createSettings() {
 }
 
 async function main() {
-  await createDefaultIssueStates();
   await createCustomFields();
   await createSettings();
 }
