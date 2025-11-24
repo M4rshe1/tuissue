@@ -25,13 +25,14 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  userProjects UserProject[]
-  userIssues   UserIssue[]
-  attachments  Attachment[]
-  issueAudits  IssueAudit[]
-  settings     Settings[]
-  comments     Comment[]     @relation("CommentAuthor")
-  filters      Filter[]
+  userProjects       UserProject[]
+  userIssues         UserIssue[]
+  attachments        Attachment[]
+  issueAudits        IssueAudit[]
+  settings           Settings[]
+  comments           Comment[]           @relation("CommentAuthor")
+  filters            Filter[]
+  customFieldOptions CustomFieldOption[]
 
   @@unique([email])
   @@index([deletedAt]) // For soft delete queries
@@ -282,6 +283,7 @@ model CustomField {
   id                 String   @id @default(cuid())
   type               String   @default("TEXT") // TEXT, TEXT_AREA, NUMBER, DATE, BOOLEAN, SELECT, MULTI_SELECT, USER, FILE, STATE, LINK
   label              String
+  placeholder        String?
   defaultShow        Boolean  @default(true)
   defaultValue       String?
   isObsolete         Boolean  @default(false)
@@ -343,7 +345,9 @@ model CustomFieldDependency {
 
 model CustomFieldOption {
   id             String      @id @default(cuid())
-  value          String
+  value          String?
+  userId         String?
+  user           User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   customFieldId  String
   isIssueClosing Boolean     @default(false)
   color          String?
