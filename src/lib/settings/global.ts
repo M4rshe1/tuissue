@@ -1,47 +1,101 @@
-interface GlobalSetting {
+interface GlobalSettingBase {
   key: string;
-  defaultValue: string | null;
 }
+
+interface GlobalSettingBoolean extends GlobalSettingBase {
+  defaultValue: boolean;
+  type: "boolean";
+}
+
+interface GlobalSettingString extends GlobalSettingBase {
+  defaultValue: string;
+  type: "string";
+}
+
+interface GlobalSettingEnum extends GlobalSettingBase {
+  defaultValue: string;
+  enum: string[];
+  type: "enum";
+}
+
+interface GlobalSettingEnumList extends GlobalSettingBase {
+  defaultValue: string[];
+  enum: string[];
+  type: "enum_list";
+}
+
+interface GlobalSettingList extends GlobalSettingBase {
+  defaultValue: string[];
+  type: "list";
+}
+
+type GlobalSetting =
+  | GlobalSettingBoolean
+  | GlobalSettingString
+  | GlobalSettingEnum
+  | GlobalSettingEnumList
+  | GlobalSettingList;
 
 export const GLOBAL_SETTINGS: Record<string, GlobalSetting> = {
   ALLOW_SIGNUP: {
     key: "ALLOW_SIGNUP",
-    defaultValue: "true",
+    type: "boolean",
+    defaultValue: true,
   },
   DEFAULT_ISSUE_STATE: {
     key: "DEFAULT_ISSUE_STATE",
+    type: "string",
     defaultValue: "OPEN",
   },
   ENABLE_EMAIL_VERIFICATION: {
     key: "ENABLE_EMAIL_VERIFICATION",
-    defaultValue: "false",
+    type: "boolean",
+    defaultValue: false,
   },
   ENABLE_PASSWORD_RESET: {
     key: "ENABLE_PASSWORD_RESET",
-    defaultValue: "true",
+    type: "boolean",
+    defaultValue: true,
   },
   ENABLE_SMTP: {
     key: "ENABLE_SMTP",
-    defaultValue: "false",
+    type: "boolean",
+    defaultValue: false,
   },
   SMTP_HOST: {
     key: "SMTP_HOST",
-    defaultValue: null,
+    type: "string",
+    defaultValue: "",
   },
   SMTP_PORT: {
     key: "SMTP_PORT",
-    defaultValue: null,
+    type: "string",
+    defaultValue: "",
   },
   SMTP_SENDER_EMAIL: {
     key: "SMTP_SENDER_EMAIL",
-    defaultValue: null,
+    type: "string",
+    defaultValue: "",
   },
   SMTP_SENDER_NAME: {
     key: "SMTP_SENDER_NAME",
-    defaultValue: null,
+    type: "string",
+    defaultValue: "",
   },
   SMTP_PASSWORD: {
     key: "SMTP_PASSWORD",
-    defaultValue: null,
+    type: "string",
+    defaultValue: "",
+  },
+  WHO_CAN_CREATE_PROJECTS: {
+    key: "WHO_CAN_CREATE_PROJECTS",
+    type: "enum",
+    defaultValue: "EVERYONE",
+    enum: ["EVERYONE", "ADMIN", "CUSTOM"],
+  },
+  CUSTOM_CREATE_PROJECT_USERS: {
+    key: "CUSTOM_CREATE_PROJECT_USERS",
+    type: "list",
+    defaultValue: [],
   },
 };

@@ -157,7 +157,7 @@ async function createSettings() {
         .filter((setting) => setting.defaultValue !== null)
         .map((setting) => ({
           key: setting.key,
-          value: setting.defaultValue ?? "",
+          value: JSON.stringify(setting.defaultValue),
           scope: SETTING_SCOPE.GLOBAL,
         })),
     ],

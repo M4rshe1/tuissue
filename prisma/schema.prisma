@@ -31,6 +31,7 @@ model User {
   issueAudits  IssueAudit[]
   settings     Settings[]
   comments     Comment[]     @relation("CommentAuthor")
+  filters      Filter[]
 
   @@unique([email])
   @@index([deletedAt]) // For soft delete queries
@@ -109,11 +110,41 @@ model Project {
   customFields CustomField[]
   userProjects UserProject[]
   settings     Settings[]
+  filters      Filter[]
 
   @@index([visibility, createdAt]) // For filtering by visibility
   @@index([name]) // For search and sorting
   @@index([createdAt]) // For chronological sorting
   @@map("project")
+}
+
+model Filter {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  filterFields FilterField[]
+}
+
+model FilterField {
+  id            String       @id @default(cuid())
+  filterId      String
+  filter        Filter       @relation(fields: [filterId], references: [id], onDelete: Cascade)
+  field         String
+  operator      String
+  value         String
+  customFieldId String?
+  customField   CustomField? @relation(fields: [customFieldId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Tag {
@@ -268,6 +299,7 @@ model CustomField {
   customFieldValues       CustomFieldValue[]
   customFieldDependencies CustomFieldDependency[] @relation("CustomFieldDepending")
   customFieldsDepending   CustomFieldDependency[] @relation("CustomFieldDependency")
+  filterFields            FilterField[]
 
   @@index([projectId, isObsolete, order]) // For ordered field queries
   @@index([projectId]) // For project field queries
