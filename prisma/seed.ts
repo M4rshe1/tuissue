@@ -173,9 +173,34 @@ async function createSettings() {
   });
 }
 
+async function checkIsSeeded() {
+  const setting = await db.settings.findFirst({
+    where: {
+      key: "IS_SEEDED",
+    },
+  });
+  return JSON.parse(setting?.value || "false");
+}
+
+async function setIsSeeded() {
+  await db.settings.create({
+    data: {
+      key: "IS_SEEDED",
+      value: JSON.stringify(true),
+      scope: SETTING_SCOPE.GLOBAL,
+    },
+  });
+}
+
 async function main() {
+  const isSeeded = await checkIsSeeded();
+  if (isSeeded) {
+    console.log("Already seeded");
+    return;
+  }
   await createCustomFields();
   await createSettings();
+  await setIsSeeded();
 }
 
 main().catch((error) => {
