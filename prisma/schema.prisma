@@ -26,13 +26,14 @@ model User {
   updatedAt DateTime @default(now()) @updatedAt
 
   userProjects       UserProject[]
-  userIssues         UserIssue[]
+  issues             Issue[]
   attachments        Attachment[]
   issueAudits        IssueAudit[]
   settings           Settings[]
   comments           Comment[]           @relation("CommentAuthor")
   filters            Filter[]
   customFieldOptions CustomFieldOption[]
+  watcherIssues      WatcherIssue[]
 
   @@unique([email])
   @@index([deletedAt]) // For soft delete queries
@@ -182,6 +183,8 @@ model Issue {
   number    Int
   title     String
   summary   String
+  creatorId String
+  creator   User    @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
@@ -191,11 +194,11 @@ model Issue {
   comments          Comment[]
   attachments       Attachment[]
   customFieldValues CustomFieldValue[]
-  userIssues        UserIssue[]
   dependencies      IssueDependency[]  @relation("IssueDependency")
   blocking          IssueDependency[]  @relation("BlockingIssue")
   issueAudits       IssueAudit[]
   issueTags         IssueTag[]
+  watcherIssues     WatcherIssue[]
 
   @@unique([projectId, number]) // Ensure unique issue numbers per project
   @@index([projectId, createdAt]) // For chronological project issues
@@ -378,23 +381,20 @@ model UserProject {
   @@map("user_project")
 }
 
-model UserIssue {
+model WatcherIssue {
   id      String @id @default(cuid())
   userId  String
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   issueId String
   issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
-  role    String @default("ASSIGNEE") // ASSIGNEE, REVIEWER, WATCHER, CREATOR
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, issueId, role]) // Prevent duplicate assignments with same role
-  @@index([userId, role]) // For user issue queries by role
-  @@index([issueId, role]) // For issue participant queries by role
-  @@index([issueId]) // For issue participant queries
-  @@index([userId]) // For user issue queries
-  @@map("user_issue")
+  @@unique([userId, issueId]) // Prevent duplicate assignments with same role
+  @@index([userId]) // For user issue queries by role
+  @@index([issueId]) // For issue participant queries by role
+  @@map("watcher_issue")
 }
 
 model IssueAudit {

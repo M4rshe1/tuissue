@@ -1,4 +1,4 @@
-import { SETTING_SCOPE } from "@/lib/enums";
+import { CUSTOM_FIELD_TYPE, SETTING_SCOPE } from "@/lib/enums";
 import { GLOBAL_SETTINGS } from "@/lib/settings/global";
 import { db } from "@/server/db";
 import { format } from "date-fns";
@@ -7,7 +7,7 @@ async function createCustomFields() {
   await db.customField.create({
     data: {
       label: "State",
-      type: "STATE",
+      type: CUSTOM_FIELD_TYPE.STATE,
       projectId: null,
       required: true,
       defaultShow: true,
@@ -23,7 +23,7 @@ async function createCustomFields() {
             isIssueClosing: true,
           },
           {
-            value: "RESOLVED - WONT FIX",
+            value: "RESOLVED - WON'T FIX",
             color: "#00FF00",
             isIssueClosing: true,
           },
@@ -40,7 +40,7 @@ async function createCustomFields() {
   await db.customField.create({
     data: {
       label: "Priority",
-      type: "SELECT",
+      type: CUSTOM_FIELD_TYPE.SELECT,
       projectId: null,
       defaultShow: true,
       required: true,
@@ -59,7 +59,7 @@ async function createCustomFields() {
   await db.customField.create({
     data: {
       label: "Severity",
-      type: "SELECT",
+      type: CUSTOM_FIELD_TYPE.SELECT,
       projectId: null,
       defaultShow: true,
       required: true,
@@ -76,7 +76,7 @@ async function createCustomFields() {
   await db.customField.create({
     data: {
       label: "Component",
-      type: "SELECT",
+      type: CUSTOM_FIELD_TYPE.SELECT,
       projectId: null,
       required: true,
       defaultValue: "Component",
@@ -95,7 +95,7 @@ async function createCustomFields() {
   await db.customField.create({
     data: {
       label: "Due Date",
-      type: "DATE",
+      type: CUSTOM_FIELD_TYPE.DATE,
       projectId: null,
       required: true,
       defaultValue: format(new Date(), "yyyy-MM-dd"),
@@ -104,7 +104,7 @@ async function createCustomFields() {
   await db.customField.create({
     data: {
       label: "Type",
-      type: "SELECT",
+      type: CUSTOM_FIELD_TYPE.SELECT,
       projectId: null,
       required: true,
       defaultValue: "BUG",
@@ -116,7 +116,7 @@ async function createCustomFields() {
   await db.customField.create({
     data: {
       label: "Hardware",
-      type: "SELECT",
+      type: CUSTOM_FIELD_TYPE.SELECT,
       projectId: null,
       required: true,
       defaultValue: "LINUX",
@@ -133,7 +133,7 @@ async function createCustomFields() {
   await db.customField.create({
     data: {
       label: "Version",
-      type: "DATE",
+      type: CUSTOM_FIELD_TYPE.DATE,
       projectId: null,
       required: true,
       defaultValue: format(new Date(), "yyyy-MM-dd"),
@@ -142,10 +142,19 @@ async function createCustomFields() {
   await db.customField.create({
     data: {
       label: "Fixed in Version",
-      type: "DATE",
+      type: CUSTOM_FIELD_TYPE.DATE,
       projectId: null,
       required: true,
       defaultValue: format(new Date(), "yyyy-MM-dd"),
+    },
+  });
+  await db.customField.create({
+    data: {
+      label: "Assignee",
+      type: CUSTOM_FIELD_TYPE.USER,
+      projectId: null,
+      required: true,
+      defaultValue: null,
     },
   });
 }
