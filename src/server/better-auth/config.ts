@@ -29,7 +29,7 @@ export const auth = betterAuth({
   ...options,
   plugins: [
     ...options.plugins,
-    customSession(async ({ user, session }, _ctx): Promise<CustomSession> => {
+    customSession(async ({ user, session }, _ctx): Promise<Session> => {
       const dbUser = await db.user.findUnique({
         where: { id: user.id },
       });
@@ -56,7 +56,7 @@ export const auth = betterAuth({
   ],
 });
 
-type CustomSession = {
+export type Session = {
   user: User & {
     role: "user" | "admin";
     mustChangePassword: boolean;
@@ -65,5 +65,3 @@ type CustomSession = {
     impersonatedBy?: string | null;
   };
 };
-
-export type Session = typeof auth.$Infer.Session;

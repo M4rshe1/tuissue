@@ -18,6 +18,35 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[]>>;
 };
 
+export const withOptionalAuth = <P extends object>(
+  WrappedComponent: ComponentType<P>,
+  reverse?: boolean,
+) => {
+  const WithOptionalAuth = async (props: PageProps) => {
+    const [params, searchParams, session, headersList] = await Promise.all([
+      props.params ?? Promise.resolve({}),
+      props.searchParams ?? Promise.resolve({}),
+      getSession(),
+      headers(),
+    ]);
+
+    if (session) {
+      await checkPasswordChange(session, headersList);
+    }
+
+    return (
+      <WrappedComponent
+        {...(props as any)}
+        session={session}
+        params={params || {}}
+        searchParams={searchParams || {}}
+      />
+    );
+  };
+
+  return WithOptionalAuth;
+};
+
 export const withAuth = <P extends object>(
   WrappedComponent: ComponentType<P>,
   reverse?: boolean,
