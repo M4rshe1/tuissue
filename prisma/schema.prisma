@@ -124,6 +124,7 @@ model Filter {
   id          String  @id @default(cuid())
   name        String
   description String?
+  isDefault   Boolean @default(false)
   projectId   String
   project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   userId      String?
@@ -139,7 +140,6 @@ model FilterField {
   id            String       @id @default(cuid())
   filterId      String
   filter        Filter       @relation(fields: [filterId], references: [id], onDelete: Cascade)
-  field         String
   operator      String
   value         String
   customFieldId String?

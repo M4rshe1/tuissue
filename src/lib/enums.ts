@@ -57,7 +57,7 @@ export const CUSTOM_FIELD_TYPE = {
   TIME_RANGE: "TIME_RANGE",
 } as const;
 
-export const CUSTOM_FIELD_DEPENDENCY_CONDITION = {
+export const OPERATORS = {
   EQUALS: "EQUALS",
   NOT_EQUALS: "NOT_EQUALS",
   CONTAINS: "CONTAINS",

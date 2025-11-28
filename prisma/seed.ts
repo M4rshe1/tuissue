@@ -10,7 +10,7 @@ async function createCustomFields() {
       type: CUSTOM_FIELD_TYPE.STATE,
       projectId: null,
       required: true,
-      defaultShow: true,
+      tableShow: true,
       defaultValue: "OPEN",
       customFieldOptions: {
         create: [
@@ -42,7 +42,7 @@ async function createCustomFields() {
       label: "Priority",
       type: CUSTOM_FIELD_TYPE.SELECT,
       projectId: null,
-      defaultShow: true,
+      tableShow: true,
       required: true,
       defaultValue: "1 - LOW",
       customFieldOptions: {
@@ -61,7 +61,7 @@ async function createCustomFields() {
       label: "Severity",
       type: CUSTOM_FIELD_TYPE.SELECT,
       projectId: null,
-      defaultShow: true,
+      tableShow: true,
       required: true,
       defaultValue: "1 - LOW",
       customFieldOptions: {
