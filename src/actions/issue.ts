@@ -1,6 +1,6 @@
 import { db } from "@/server/db";
 import { z } from "zod";
-import { OPERATORS } from "@/lib/enums";
+import { OPERATORS, PROJECT_VISIBILITY } from "@/lib/enums";
 import { actionAuth, actionProject } from "@/lib/hoc-actions";
 import { USER_PROJECT_ROLE } from "@/lib/enums";
 
@@ -68,16 +68,20 @@ export const getIssuesFilteredAction = actionProject(
       where: {
         project: {
           OR: [
-            { visibility: "PUBLIC" },
+            { visibility: PROJECT_VISIBILITY.PUBLIC },
             {
-              visibility: session?.user ? "SEMI_PUBLIC" : "NOT_ALLOWED",
+              visibility: session?.user
+                ? PROJECT_VISIBILITY.SEMI_PUBLIC
+                : "NOT_ALLOWED",
             },
-            { visibility: "SEMI_PROTECTED" },
+            { visibility: PROJECT_VISIBILITY.SEMI_PROTECTED },
             {
-              visibility: session?.user ? "PROTECTED" : "NOT_ALLOWED",
+              visibility: session?.user
+                ? PROJECT_VISIBILITY.PROTECTED
+                : "NOT_ALLOWED",
             },
             {
-              visibility: "PRIVATE",
+              visibility: PROJECT_VISIBILITY.PRIVATE,
               userProjects: {
                 some: {
                   userId: session?.user?.id ?? "",
@@ -88,7 +92,11 @@ export const getIssuesFilteredAction = actionProject(
               visibility:
                 session?.user?.role === "admin"
                   ? {
-                      in: ["SEMI_PROTECTED", "PROTECTED", "PRIVATE"],
+                      in: [
+                        PROJECT_VISIBILITY.SEMI_PROTECTED,
+                        PROJECT_VISIBILITY.PROTECTED,
+                        PROJECT_VISIBILITY.PRIVATE,
+                      ],
                     }
                   : "NOT_ALLOWED",
             },
@@ -123,14 +131,18 @@ export const getIssueAction = actionProject(
           OR: [
             { visibility: "PUBLIC" },
             {
-              visibility: session?.user ? "SEMI_PUBLIC" : "NOT_ALLOWED",
+              visibility: session?.user
+                ? PROJECT_VISIBILITY.SEMI_PUBLIC
+                : "NOT_ALLOWED",
             },
-            { visibility: "SEMI_PROTECTED" },
+            { visibility: PROJECT_VISIBILITY.SEMI_PROTECTED },
             {
-              visibility: session?.user ? "PROTECTED" : "NOT_ALLOWED",
+              visibility: session?.user
+                ? PROJECT_VISIBILITY.PROTECTED
+                : "NOT_ALLOWED",
             },
             {
-              visibility: "PRIVATE",
+              visibility: PROJECT_VISIBILITY.PRIVATE,
               userProjects: {
                 some: {
                   userId: session?.user?.id ?? "",
@@ -141,7 +153,11 @@ export const getIssueAction = actionProject(
               visibility:
                 session?.user?.role === "admin"
                   ? {
-                      in: ["SEMI_PROTECTED", "PROTECTED", "PRIVATE"],
+                      in: [
+                        PROJECT_VISIBILITY.SEMI_PROTECTED,
+                        PROJECT_VISIBILITY.PROTECTED,
+                        PROJECT_VISIBILITY.PRIVATE,
+                      ],
                     }
                   : "NOT_ALLOWED",
             },
@@ -190,9 +206,19 @@ export const createIssueAction = actionAuth(
       where: {
         id: projectId,
         OR: [
-          { visibility: { in: ["PUBLIC", "SEMI_PUBLIC"] } },
           {
-            visibility: { in: ["SEMI_PROTECTED", "PROTECTED", "PRIVATE"] },
+            visibility: {
+              in: [PROJECT_VISIBILITY.PUBLIC, PROJECT_VISIBILITY.SEMI_PUBLIC],
+            },
+          },
+          {
+            visibility: {
+              in: [
+                PROJECT_VISIBILITY.SEMI_PROTECTED,
+                PROJECT_VISIBILITY.PROTECTED,
+                PROJECT_VISIBILITY.PRIVATE,
+              ],
+            },
             userProjects: {
               some: {
                 userId: session?.user?.id ?? "",
@@ -203,7 +229,13 @@ export const createIssueAction = actionAuth(
           {
             visibility:
               session?.user?.role === "admin"
-                ? { in: ["SEMI_PROTECTED", "PROTECTED", "PRIVATE"] }
+                ? {
+                    in: [
+                      PROJECT_VISIBILITY.PRIVATE,
+                      PROJECT_VISIBILITY.SEMI_PROTECTED,
+                      PROJECT_VISIBILITY.PROTECTED,
+                    ],
+                  }
                 : "NOT_ALLOWED",
             userProjects: {
               some: {
