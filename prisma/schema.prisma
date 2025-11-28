@@ -249,12 +249,11 @@ model Attachment {
   mimeType String? // MIME type for better file handling
   userId   String?
   user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  issueId  String
+  issue    Issue   @relation(fields: [issueId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  issueId String
-  issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
 
   @@index([issueId, type]) // For filtering attachments by type
   @@index([userId]) // For user attachment queries

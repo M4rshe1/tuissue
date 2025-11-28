@@ -16,6 +16,11 @@ type ActionAuthFunction<S extends z.ZodType<any, any>, T> = (args: {
   session: Session;
 }) => Promise<T>;
 
+type ActionProjectFunction<S extends z.ZodType<any, any>, T> = (args: {
+  data: z.infer<S>;
+  session: Session | null;
+}) => Promise<T>;
+
 type ActionInput = FormData | Record<string, any>;
 
 export async function action<S extends z.ZodType<any, any>, T>(
@@ -154,3 +159,45 @@ export async function actionAdmin<S extends z.ZodType<any, any>, T>(
     };
   };
 }
+
+export async function actionProject<S extends z.ZodType<any, any>, T>(
+  schema: S,
+  action: ActionProjectFunction<S, T>,
+) {
+  return async (input: ActionInput) => {
+    const session = await getSession();
+    const result = schema.safeParse(input);
+    if (!result.success) {
+      return {
+        data: undefined,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Validierungsfehler",
+          details: result.error.message,
+        },
+      };
+    }
+    const { data, error } = await tryCatch(
+      action({
+        data: result.data,
+        session: session as Session,
+      }),
+    );
+    if (error) {
+      return {
+        data: undefined,
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Interner Serverfehler",
+          details: error.message,
+        },
+      };
+    }
+    return {
+      data,
+      error: undefined,
+    };
+  };
+}
+
+
