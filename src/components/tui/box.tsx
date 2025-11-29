@@ -15,7 +15,7 @@ export const Box = ({
   };
 }) => {
   return (
-    <div className={cn("bg-card relative w-full p-2", className)}>
+    <div className={cn("bg-card relative h-full w-full p-2", className)}>
       {text?.topLeft && (
         <div className="bg-card absolute top-0 left-3 px-1 text-xs font-bold">
           {text.topLeft}

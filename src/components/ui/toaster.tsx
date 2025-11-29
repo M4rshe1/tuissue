@@ -25,7 +25,7 @@ function Toast(props: ToastProps) {
 
   return (
     <Box
-      className={cn("bg-card relative w-full max-w-sm p-2", {
+      className={cn("bg-card relative w-full max-w-sm flex-1 p-2", {
         "text-green-600": variant === "success",
         "text-red-600": variant === "error",
         "text-yellow-600": variant === "warning",
