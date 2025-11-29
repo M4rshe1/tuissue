@@ -125,7 +125,7 @@ const TEMPLATES: Template[] = [
   },
 ];
 
-export const createFromTemplateAction = actionAdmin(
+export const createFromTemplateAction = await actionAdmin(
   z.object({
     templateName: z.string(),
     name: z.string().min(1).max(255),

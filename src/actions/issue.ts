@@ -45,7 +45,7 @@ function operatorToPrisma(operator: string, inputValue: string) {
   }
 }
 
-export const getIssuesFilteredAction = actionProject(
+export const getIssuesFilteredAction = await actionProject(
   z.object({
     filterId: z.string(),
   }),
@@ -118,7 +118,7 @@ export const getIssuesFilteredAction = actionProject(
   },
 );
 
-export const getIssueAction = actionProject(
+export const getIssueAction = await actionProject(
   z.object({
     issueId: z.string(),
   }),
@@ -194,7 +194,7 @@ export const getIssueAction = actionProject(
   },
 );
 
-export const createIssueAction = actionAuth(
+export const createIssueAction = await actionAuth(
   z.object({
     title: z.string(),
     summary: z.string(),

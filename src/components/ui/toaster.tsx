@@ -1,57 +1,72 @@
 "use client";
 
-import React from "react";
 import { toast as sonnerToast } from "sonner";
 import { cn } from "@/lib/utils";
+import { XIcon } from "lucide-react";
+import { Box } from "@/components/tui/box";
+import { Button, buttonVariants } from "@/components/ui/button";
+import type { VariantProps } from "class-variance-authority";
 
 export function toast(toast: Omit<ToastProps, "id">) {
-  return sonnerToast.custom((id) => (
+  return sonnerToast.custom((id: string) => (
     <Toast
       id={id}
       variant={toast.variant}
+      header={toast.header}
       title={toast.title}
       description={toast.description}
-      button={{
-        label: toast.button.label,
-        onClick: () => toast.button.onClick(),
-      }}
+      button={toast.button}
     />
   ));
 }
 
 function Toast(props: ToastProps) {
-  const { title, description, button, id, variant } = props;
+  const { title, description, button, id, variant, header, hideHeader } = props;
 
   return (
-    <div
-      className={cn(
-        "flex w-full items-center p-4 shadow-lg ring-1 md:max-w-[364px]",
-        {
-          "bg-green-50 text-green-600": variant === "success",
-          "bg-red-50 text-red-600": variant === "error",
-          "bg-yellow-50 text-yellow-600": variant === "warning",
-          "bg-blue-50 text-blue-600": variant === "info",
-        },
-      )}
+    <Box
+      className={cn("bg-card relative w-full max-w-sm p-2", {
+        "text-green-600": variant === "success",
+        "text-red-600": variant === "error",
+        "text-yellow-600": variant === "warning",
+        "text-blue-600": variant === "info",
+        "text-muted-foreground": variant === "default",
+      })}
+      text={{
+        topLeft: hideHeader ? undefined : header || variant.toUpperCase(),
+      }}
     >
-      <div className="flex flex-1 items-center">
-        <div className="w-full">
-          <p className="text-sm font-medium text-gray-900">{title}</p>
-          <p className="mt-1 text-sm text-gray-500">{description}</p>
+      <div className="bg-card absolute top-0 right-3">
+        <XIcon
+          className="text-muted-foreground hover:text-foreground size-4 cursor-pointer"
+          onClick={() => sonnerToast.dismiss(id as string)}
+        />
+      </div>
+      <div
+        className={cn(
+          "my-auto grid h-full w-full grid-cols-[1fr_auto] grid-rows-[24px_24px] items-center gap-x-2 px-2 py-2 shadow-lg ring-2",
+        )}
+      >
+        <p className="text-foreground w-full text-sm font-bold">{title}</p>
+        <div className="ml-3 shrink-0">
+          {button && (
+            <Button
+              variant={button.style}
+              size={"xs"}
+              onClick={() => {
+                button?.onClick();
+                sonnerToast.dismiss(id);
+              }}
+            >
+              {button.label}
+            </Button>
+          )}
         </div>
+        <p className="text-muted-foreground col-span-2 text-xs">
+          {description}
+        </p>
       </div>
-      <div className="ml-5 shrink-0 rounded-md text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden">
-        <button
-          className="rounded bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-600 hover:bg-indigo-100"
-          onClick={() => {
-            button.onClick();
-            sonnerToast.dismiss(id);
-          }}
-        >
-          {button.label}
-        </button>
-      </div>
-    </div>
+    </Box>
   );
 }
 
@@ -59,9 +74,12 @@ interface ToastProps {
   id: string | number;
   title: string;
   description: string;
-  variant: "success" | "error" | "warning" | "info";
-  button: {
+  variant: "success" | "error" | "warning" | "info" | "default";
+  header?: string;
+  hideHeader?: boolean;
+  button?: {
     label: string;
     onClick: () => void;
+    style?: VariantProps<typeof buttonVariants>["variant"];
   };
 }

@@ -4,8 +4,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-jetbrains-mono:
+    var(--font-jetbrains-mono), ui-monospace, monospace, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 @theme inline {
@@ -81,7 +82,7 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
-.dark {
+[data-theme="dark"] {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -118,6 +119,9 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    font-family:
+      var(--font-monospace), ui-monospace, monospace, "Apple Color Emoji",
+      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   }
   body {
     @apply bg-background text-foreground;
