@@ -8,16 +8,12 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import type { VariantProps } from "class-variance-authority";
 
 export function toast(toast: Omit<ToastProps, "id">) {
-  return sonnerToast.custom((id: string) => (
-    <Toast
-      id={id}
-      variant={toast.variant}
-      header={toast.header}
-      title={toast.title}
-      description={toast.description}
-      button={toast.button}
-    />
-  ));
+  return sonnerToast.custom((id) => <Toast id={id} {...toast} />, {
+    style: {
+      width: "100%",
+      maxWidth: "min(100%, 24rem)",
+    },
+  });
 }
 
 function Toast(props: ToastProps) {
@@ -25,7 +21,7 @@ function Toast(props: ToastProps) {
 
   return (
     <Box
-      className={cn("bg-card relative w-full max-w-sm flex-1 p-2", {
+      className={cn("bg-card relative w-full rounded-xs", {
         "text-green-600": variant === "success",
         "text-red-600": variant === "error",
         "text-yellow-600": variant === "warning",
@@ -36,7 +32,7 @@ function Toast(props: ToastProps) {
         topLeft: hideHeader ? undefined : header || variant.toUpperCase(),
       }}
     >
-      <div className="bg-card absolute top-0 right-3">
+      <div className="bg-card absolute top-0 right-4">
         <XIcon
           className="text-muted-foreground hover:text-foreground size-4 cursor-pointer"
           onClick={() => sonnerToast.dismiss(id as string)}
@@ -44,10 +40,12 @@ function Toast(props: ToastProps) {
       </div>
       <div
         className={cn(
-          "my-auto grid h-full w-full grid-cols-[1fr_auto] grid-rows-[24px_24px] items-center gap-x-2 px-2 py-2 shadow-lg ring-2",
+          "my-auto grid h-full w-full grid-cols-[1fr_auto] grid-rows-[24px_24px] items-center gap-x-2",
         )}
       >
-        <p className="text-foreground w-full text-sm font-bold">{title}</p>
+        <p className="text-foreground w-full overflow-hidden text-sm font-bold text-ellipsis">
+          {title}
+        </p>
         <div className="ml-3 shrink-0">
           {button && (
             <Button
@@ -62,7 +60,7 @@ function Toast(props: ToastProps) {
             </Button>
           )}
         </div>
-        <p className="text-muted-foreground col-span-2 text-xs">
+        <p className="text-muted-foreground col-span-2 overflow-hidden text-sm text-ellipsis">
           {description}
         </p>
       </div>

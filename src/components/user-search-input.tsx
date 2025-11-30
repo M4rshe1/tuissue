@@ -20,14 +20,6 @@ import {
 import { useSearchUsersQuery, useGetUserQuery } from "@/queries/user";
 import { Loader2 } from "lucide-react";
 
-type User = {
-  id: string;
-  firstName: string | null;
-  lastName: string | null;
-  email: string;
-  role: string;
-};
-
 type UserSearchInputProps = {
   value?: string;
   onChange?: (value: string) => void;
@@ -76,10 +68,7 @@ export function UserSearchInput({
 
   const displayName = React.useMemo(() => {
     if (!selectedUser) return "";
-    const name = [selectedUser.firstName, selectedUser.lastName]
-      .filter(Boolean)
-      .join(" ");
-    return name || selectedUser.email;
+    return selectedUser.name;
   }, [selectedUser]);
 
   return (
@@ -128,10 +117,7 @@ export function UserSearchInput({
                 </CommandEmpty>
                 <CommandGroup>
                   {users?.map((user) => {
-                    const name = [user.firstName, user.lastName]
-                      .filter(Boolean)
-                      .join(" ");
-                    const displayText = name || user.email;
+                    const displayText = user.name;
                     return (
                       <CommandItem
                         key={user.id}
@@ -150,11 +136,9 @@ export function UserSearchInput({
                         />
                         <div className="flex flex-col">
                           <span>{displayText}</span>
-                          {name && (
-                            <span className="text-muted-foreground text-xs">
-                              {user.email}
-                            </span>
-                          )}
+                          <span className="text-muted-foreground text-xs">
+                            {user.email}
+                          </span>
                         </div>
                       </CommandItem>
                     );
