@@ -1,5 +1,6 @@
 interface GlobalSettingBase {
   key: string;
+  sensitive?: boolean;
 }
 
 interface GlobalSettingBoolean extends GlobalSettingBase {
@@ -61,31 +62,37 @@ export const GLOBAL_SETTINGS: Record<string, GlobalSetting> = {
     key: "ENABLE_SMTP",
     type: "boolean",
     defaultValue: false,
+    sensitive: true,
   },
   SMTP_HOST: {
     key: "SMTP_HOST",
     type: "string",
     defaultValue: "",
+    sensitive: true,
   },
   SMTP_PORT: {
     key: "SMTP_PORT",
     type: "string",
     defaultValue: "",
+    sensitive: true,
   },
   SMTP_SENDER_EMAIL: {
     key: "SMTP_SENDER_EMAIL",
     type: "string",
     defaultValue: "",
+    sensitive: true,
   },
   SMTP_SENDER_NAME: {
     key: "SMTP_SENDER_NAME",
     type: "string",
     defaultValue: "",
+    sensitive: true,
   },
   SMTP_PASSWORD: {
     key: "SMTP_PASSWORD",
     type: "string",
     defaultValue: "",
+    sensitive: true,
   },
   WHO_CAN_CREATE_PROJECTS: {
     key: "WHO_CAN_CREATE_PROJECTS",

@@ -21,23 +21,34 @@ function Toast(props: ToastProps) {
 
   return (
     <Box
-      className={cn("bg-card relative w-full rounded-xs", {
-        "text-green-600": variant === "success",
-        "text-red-600": variant === "error",
-        "text-yellow-600": variant === "warning",
-        "text-blue-600": variant === "info",
-        "text-muted-foreground": variant === "default",
-      })}
+      onClose={() => sonnerToast.dismiss(id as string)}
+      style={{
+        background: "bg-card",
+        box: "rounded-xs",
+        content: cn("w-full", {
+          "text-success": variant === "success",
+          "text-error": variant === "error",
+          "text-warning": variant === "warning",
+          "text-info": variant === "info",
+          "text-muted-foreground": variant === "default",
+        }),
+      }}
       text={{
-        topLeft: hideHeader ? undefined : header || variant.toUpperCase(),
+        topLeft: hideHeader ? undefined : (
+          <span
+            className={cn({
+              "text-success": variant === "success",
+              "text-error": variant === "error",
+              "text-warning": variant === "warning",
+              "text-info": variant === "info",
+              "text-muted-foreground": variant === "default",
+            })}
+          >
+            {header || variant.toUpperCase()}
+          </span>
+        ),
       }}
     >
-      <div className="bg-card absolute top-0 right-4">
-        <XIcon
-          className="text-muted-foreground hover:text-foreground size-4 cursor-pointer"
-          onClick={() => sonnerToast.dismiss(id as string)}
-        />
-      </div>
       <div
         className={cn(
           "my-auto grid h-full w-full grid-cols-[1fr_auto] grid-rows-[24px_24px] items-center gap-x-2",

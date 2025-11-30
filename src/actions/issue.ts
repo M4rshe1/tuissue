@@ -1,7 +1,9 @@
+"use server";
+
 import { db } from "@/server/db";
 import { z } from "zod";
 import { OPERATORS, PROJECT_VISIBILITY } from "@/lib/enums";
-import { actionAuth, actionProject } from "@/lib/hoc-actions";
+import { actionAuth, actionOptionalAuth } from "@/lib/hoc-actions";
 import { USER_PROJECT_ROLE } from "@/lib/enums";
 
 function operatorToPrisma(operator: string, inputValue: string) {
@@ -45,7 +47,7 @@ function operatorToPrisma(operator: string, inputValue: string) {
   }
 }
 
-export const getIssuesFilteredAction = await actionProject(
+export const getIssuesFilteredAction = await actionOptionalAuth(
   z.object({
     filterId: z.string(),
   }),
@@ -118,7 +120,7 @@ export const getIssuesFilteredAction = await actionProject(
   },
 );
 
-export const getIssueAction = await actionProject(
+export const getIssueAction = await actionOptionalAuth(
   z.object({
     issueId: z.string(),
   }),

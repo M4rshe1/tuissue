@@ -30,14 +30,16 @@ export const withOptionalAuth = <P extends object>(
       headers(),
     ]);
 
-    if (session) {
+    if (session && !reverse) {
       await checkPasswordChange(session, headersList);
+    } else if (session && reverse) {
+      redirect("/");
     }
 
     return (
       <WrappedComponent
         {...(props as any)}
-        session={session}
+        session={session ?? null}
         params={params || {}}
         searchParams={searchParams || {}}
       />

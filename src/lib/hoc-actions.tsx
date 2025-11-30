@@ -15,12 +15,6 @@ type ActionAuthFunction<S extends z.ZodType<any, any>, T> = (args: {
   data: z.infer<S>;
   session: Session;
 }) => Promise<T>;
-
-type ActionProjectFunction<S extends z.ZodType<any, any>, T> = (args: {
-  data: z.infer<S>;
-  session: Session | null;
-}) => Promise<T>;
-
 type ActionInput = FormData | Record<string, any>;
 
 export async function action<S extends z.ZodType<any, any>, T>(
@@ -160,9 +154,9 @@ export async function actionAdmin<S extends z.ZodType<any, any>, T>(
   };
 }
 
-export async function actionProject<S extends z.ZodType<any, any>, T>(
+export async function actionOptionalAuth<S extends z.ZodType<any, any>, T>(
   schema: S,
-  action: ActionProjectFunction<S, T>,
+  action: ActionAuthFunction<S, T>,
 ) {
   return async (input: ActionInput) => {
     const session = await getSession();
@@ -199,5 +193,3 @@ export async function actionProject<S extends z.ZodType<any, any>, T>(
     };
   };
 }
-
-

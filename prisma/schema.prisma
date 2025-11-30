@@ -29,7 +29,7 @@ model User {
   issues             Issue[]
   attachments        Attachment[]
   issueAudits        IssueAudit[]
-  settings           Settings[]
+  settings           Setting[]
   comments           Comment[]           @relation("CommentAuthor")
   filters            Filter[]
   customFieldOptions CustomFieldOption[]
@@ -39,7 +39,6 @@ model User {
   @@index([deletedAt]) // For soft delete queries
   @@index([email, deletedAt]) // For authentication queries
   @@index([banned, banExpires]) // For ban checks
-  @@map("user")
 }
 
 model Session {
@@ -58,7 +57,6 @@ model Session {
   @@unique([token])
   @@index([userId, expiresAt]) // For session cleanup queries
   @@index([expiresAt]) // For expired session cleanup
-  @@map("session")
 }
 
 model Account {
@@ -80,7 +78,6 @@ model Account {
 
   @@unique([providerId, accountId]) // Prevent duplicate OAuth accounts
   @@index([userId, providerId]) // For user account lookups
-  @@map("account")
 }
 
 model Verification {
@@ -94,7 +91,6 @@ model Verification {
 
   @@index([identifier, value]) // For verification lookups
   @@index([expiresAt]) // For cleanup of expired verifications
-  @@map("verification")
 }
 
 model Project {
@@ -111,13 +107,12 @@ model Project {
   issues       Issue[]
   customFields CustomField[]
   userProjects UserProject[]
-  settings     Settings[]
+  settings     Setting[]
   filters      Filter[]
 
   @@index([visibility, createdAt]) // For filtering by visibility
   @@index([name]) // For search and sorting
   @@index([createdAt]) // For chronological sorting
-  @@map("project")
 }
 
 model Filter {
@@ -158,8 +153,6 @@ model Tag {
   updatedAt DateTime @updatedAt
 
   issueTags IssueTag[]
-
-  @@map("tag")
 }
 
 model IssueTag {
@@ -175,7 +168,6 @@ model IssueTag {
   @@unique([issueId, tagId]) // Prevent duplicate tag assignments
   @@index([issueId]) // For issue tag queries
   @@index([tagId]) // For tag usage queries
-  @@map("issue_tag")
 }
 
 model Issue {
@@ -204,7 +196,6 @@ model Issue {
   @@index([projectId, createdAt]) // For chronological project issues
   @@index([createdAt]) // For chronological sorting
   @@index([updatedAt]) // For recently updated queries
-  @@map("issue")
 }
 
 model IssueDependency {
@@ -220,7 +211,6 @@ model IssueDependency {
   @@unique([issueId, dependencyId]) // Prevent duplicate dependencies
   @@index([issueId]) // For issue dependency queries
   @@index([dependencyId]) // For blocking issue queries
-  @@map("issue_dependency")
 }
 
 model Comment {
@@ -237,7 +227,6 @@ model Comment {
 
   @@index([issueId, createdAt]) // For chronological comment queries
   @@index([userId]) // For user comment queries
-  @@map("comment")
 }
 
 model Attachment {
@@ -258,10 +247,9 @@ model Attachment {
   @@index([issueId, type]) // For filtering attachments by type
   @@index([userId]) // For user attachment queries
   @@index([createdAt]) // For chronological sorting
-  @@map("attachment")
 }
 
-model Settings {
+model Setting {
   id        String   @id @default(cuid())
   key       String
   value     String
@@ -278,7 +266,6 @@ model Settings {
   @@index([scope, key]) // For global settings lookup
   @@index([projectId, key]) // For project settings lookup
   @@index([userId, key]) // For user settings lookup
-  @@map("settings")
 }
 
 model CustomField {
@@ -307,7 +294,6 @@ model CustomField {
 
   @@index([projectId, isObsolete, order]) // For ordered field queries
   @@index([projectId]) // For project field queries
-  @@map("custom_field")
 }
 
 model CustomFieldValue {
@@ -324,7 +310,6 @@ model CustomFieldValue {
   @@unique([issueId, customFieldId]) // Ensure one value per field per issue
   @@index([issueId]) // For issue custom field queries
   @@index([customFieldId, value]) // For filtering by custom field value
-  @@map("custom_field_value")
 }
 
 model CustomFieldDependency {
@@ -342,7 +327,6 @@ model CustomFieldDependency {
   @@unique([customFieldId, customFieldDependencyId, condition, value]) // Prevent duplicate dependencies
   @@index([customFieldId]) // For field dependency queries
   @@index([customFieldDependencyId]) // For reverse dependency queries
-  @@map("custom_field_dependency")
 }
 
 model CustomFieldOption {
@@ -359,7 +343,6 @@ model CustomFieldOption {
   updatedAt DateTime @updatedAt
 
   @@unique([customFieldId, value]) // Prevent duplicate options
-  @@map("custom_field_option")
 }
 
 model UserProject {
@@ -377,7 +360,6 @@ model UserProject {
   @@index([userId]) // For user project queries
   @@index([projectId, role]) // For project member queries by role
   @@index([projectId]) // For project member queries
-  @@map("user_project")
 }
 
 model WatcherIssue {
@@ -393,7 +375,6 @@ model WatcherIssue {
   @@unique([userId, issueId]) // Prevent duplicate assignments with same role
   @@index([userId]) // For user issue queries by role
   @@index([issueId]) // For issue participant queries by role
-  @@map("watcher_issue")
 }
 
 model IssueAudit {
@@ -414,5 +395,4 @@ model IssueAudit {
   @@index([userId, createdAt]) // For user activity queries
   @@index([action, createdAt]) // For action-based queries
   @@index([issueId, action]) // For specific action queries on issues
-  @@map("issue_audit")
 }

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getUserAction, searchUsersAction } from "@/actions/user";
-import { toast } from "@/components/ui/toaster";
+import { toast } from "@/components/tui/toaster";
 
 export const useSearchUsersQuery = (
   query: string,
