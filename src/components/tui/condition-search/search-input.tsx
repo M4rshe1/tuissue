@@ -5,6 +5,12 @@ import { Loader2 } from "lucide-react";
 import { Popover, PopoverAnchor, PopoverContent } from "../popover";
 import { Command, CommandItem, CommandList } from "../command";
 import { cn } from "@/lib/utils";
+import { OPERATORS as OPERATORS_CONFIG } from "@/lib/operators";
+import {
+  requiresValueSelection,
+  requiresDirectInput,
+  getInputComponent,
+} from "./field-inputs";
 import type {
   ConditionSearchOption,
   ConditionSearchOptionValue,
@@ -39,8 +45,24 @@ export const SearchInput = ({
 }: SearchInputProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+  const [showDirectInput, setShowDirectInput] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const popoverContentRef = useRef<HTMLDivElement | null>(null);
+
+  const currentCategory = options.find(
+    (opt) => opt.category === selectedCategory,
+  );
+  const needsDirectInput = currentCategory
+    ? requiresDirectInput(currentCategory.type)
+    : false;
+  const needsValueSelection = currentCategory
+    ? requiresValueSelection(currentCategory.type)
+    : false;
+
+  const operatorConfig = selectedOperator
+    ? OPERATORS_CONFIG[selectedOperator as keyof typeof OPERATORS_CONFIG]
+    : null;
+  const requiresValue = operatorConfig ? !operatorConfig.selfClearing : false;
 
   const handleChange = (newValue: string) => {
     onChange(newValue);
@@ -48,11 +70,19 @@ export const SearchInput = ({
     if (newValue.length > 0) {
       if (!selectedCategory) {
         setIsPopoverOpen(true);
-      } else if (selectedOperator) {
-        setIsPopoverOpen(true);
+        setShowDirectInput(false);
+      } else if (selectedOperator && requiresValue) {
+        if (needsDirectInput) {
+          setShowDirectInput(true);
+          setIsPopoverOpen(false);
+        } else if (needsValueSelection) {
+          setIsPopoverOpen(true);
+          setShowDirectInput(false);
+        }
       }
     } else if (newValue.length === 0 && !selectedCategory) {
       setIsPopoverOpen(false);
+      setShowDirectInput(false);
     }
   };
 
@@ -84,7 +114,15 @@ export const SearchInput = ({
         }
       }
     } else if (e.key === "Enter") {
-      if (isPopoverOpen) {
+      if (showDirectInput && selectedCategory && selectedOperator) {
+        // Submit direct input
+        e.preventDefault();
+        if (value.trim()) {
+          onSelectValue(value, value);
+          setShowDirectInput(false);
+          setHighlightedIndex(-1);
+        }
+      } else if (isPopoverOpen) {
         if (highlightedIndex >= 0 && popoverContentRef.current) {
           const items = popoverContentRef.current.querySelectorAll(
             '[data-slot="command-item-wrapper"]',
@@ -106,8 +144,7 @@ export const SearchInput = ({
           );
           const matchingCategory =
             filteredOptions[
-              highlightedIndex >= 0 &&
-              highlightedIndex < filteredOptions.length
+              highlightedIndex >= 0 && highlightedIndex < filteredOptions.length
                 ? highlightedIndex
                 : 0
             ];
@@ -116,7 +153,7 @@ export const SearchInput = ({
             onSelectCategory(matchingCategory.category);
             setHighlightedIndex(-1);
           }
-        } else if (selectedOperator) {
+        } else if (selectedOperator && needsValueSelection) {
           const filteredValues = displayValues.filter((v) =>
             value ? v.label.toLowerCase().includes(value.toLowerCase()) : true,
           );
@@ -136,8 +173,9 @@ export const SearchInput = ({
         onSearch();
       }
     } else if (e.key === "Escape") {
-      if (isPopoverOpen) {
+      if (isPopoverOpen || showDirectInput) {
         setIsPopoverOpen(false);
+        setShowDirectInput(false);
         setHighlightedIndex(-1);
       }
     } else {
@@ -148,6 +186,12 @@ export const SearchInput = ({
   const handleFocus = () => {
     if (value.length > 0 && !selectedCategory) {
       setIsPopoverOpen(true);
+    } else if (selectedCategory && selectedOperator && requiresValue) {
+      if (needsDirectInput) {
+        setShowDirectInput(true);
+      } else if (needsValueSelection) {
+        setIsPopoverOpen(true);
+      }
     }
   };
 
@@ -156,13 +200,22 @@ export const SearchInput = ({
       <input
         ref={inputRef}
         type="text"
-        placeholder={placeholder}
+        placeholder={
+          showDirectInput
+            ? `Enter ${currentCategory?.type.toLowerCase()} value...`
+            : placeholder
+        }
         value={value}
         onChange={(e) => handleChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
         className="text-foreground w-full min-w-0 text-sm outline-none focus:ring-0 focus:ring-offset-0"
       />
+      {showDirectInput && (
+        <div className="text-muted-foreground absolute top-0 right-0 text-xs">
+          Press Enter to apply
+        </div>
+      )}
       <Popover
         open={isPopoverOpen}
         onOpenChange={(open) => {
@@ -226,7 +279,7 @@ export const SearchInput = ({
                       </CommandItem>
                     ))}
                 </CommandList>
-              ) : selectedOperator ? (
+              ) : selectedOperator && needsValueSelection ? (
                 <CommandList className="py-2">
                   {isLoadingValues ? (
                     <div className="text-muted-foreground flex items-center justify-center py-6 text-sm">
@@ -273,4 +326,3 @@ export const SearchInput = ({
     </div>
   );
 };
-

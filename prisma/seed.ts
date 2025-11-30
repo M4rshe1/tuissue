@@ -160,7 +160,7 @@ async function createCustomFields() {
 }
 
 async function createSettings() {
-  await db.settings.createMany({
+  await db.setting.createMany({
     data: [
       ...Object.values(GLOBAL_SETTINGS)
         .filter((setting) => setting.defaultValue !== null)
@@ -174,7 +174,7 @@ async function createSettings() {
 }
 
 async function checkIsSeeded() {
-  const setting = await db.settings.findFirst({
+  const setting = await db.setting.findFirst({
     where: {
       key: "IS_SEEDED",
     },
@@ -183,7 +183,7 @@ async function checkIsSeeded() {
 }
 
 async function setIsSeeded() {
-  await db.settings.create({
+  await db.setting.create({
     data: {
       key: "IS_SEEDED",
       value: JSON.stringify(true),

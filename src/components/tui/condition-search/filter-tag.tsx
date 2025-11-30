@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { X, Loader2 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "../popover";
 import { Command, CommandInput, CommandItem, CommandList } from "../command";
 import { OPERATORS as OPERATORS_CONFIG } from "@/lib/operators";
 import { cn } from "@/lib/utils";
 import { getOperatorsForType } from "./utils";
+import {
+  requiresValueSelection,
+  requiresDirectInput,
+  getInputComponent,
+  supportsMultipleSelection,
+} from "./field-inputs";
 import type {
   StructuredQuery,
   ConditionSearchOption,
@@ -45,14 +51,28 @@ export const FilterTag = ({
     null,
   );
   const [editSearchQuery, setEditSearchQuery] = useState("");
+  const [editDirectValue, setEditDirectValue] = useState("");
   const [editAsyncValues, setEditAsyncValues] = useState<
     ConditionSearchOptionValue[]
   >([]);
   const [isLoadingEditValues, setIsLoadingEditValues] = useState(false);
+  const [selectedMultiValues, setSelectedMultiValues] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const operatorConfig =
     OPERATORS_CONFIG[query.operator as keyof typeof OPERATORS_CONFIG];
   const isSelfClearing = operatorConfig?.selfClearing ?? false;
+
+  const categoryOption = options.find((opt) => opt.category === query.category);
+  const needsDirectInput = categoryOption
+    ? requiresDirectInput(categoryOption.type)
+    : false;
+  const needsValueSelection = categoryOption
+    ? requiresValueSelection(categoryOption.type)
+    : false;
+  const isMultiSelect = categoryOption
+    ? supportsMultipleSelection(categoryOption.type)
+    : false;
 
   const handleEditOperator = () => {
     setEditingType("operator");
@@ -62,6 +82,8 @@ export const FilterTag = ({
   const handleEditValue = () => {
     setEditingType("value");
     setEditSearchQuery("");
+    setEditDirectValue(query.value || "");
+    setSelectedMultiValues(query.selectedValues || []);
     const categoryOption = options.find(
       (opt) => opt.category === query.category,
     );
@@ -82,7 +104,42 @@ export const FilterTag = ({
   const handleClosePopover = () => {
     setEditingType(null);
     setEditSearchQuery("");
+    setEditDirectValue("");
     setEditAsyncValues([]);
+    setSelectedMultiValues([]);
+  };
+
+  const handleDirectInputSubmit = () => {
+    if (editDirectValue.trim()) {
+      onEditValue(editDirectValue, editDirectValue);
+      handleClosePopover();
+    }
+  };
+
+  const handleMultiSelectToggle = (value: string, label: string) => {
+    const newSelectedValues = selectedMultiValues.includes(value)
+      ? selectedMultiValues.filter((v) => v !== value)
+      : [...selectedMultiValues, value];
+    setSelectedMultiValues(newSelectedValues);
+  };
+
+  const handleMultiSelectApply = () => {
+    if (selectedMultiValues.length > 0) {
+      const displayValues = categoryOption?.useAsyncValues
+        ? editAsyncValues
+        : categoryOption?.values || [];
+
+      const labels = selectedMultiValues
+        .map((val) => displayValues.find((v) => v.value === val)?.label)
+        .filter(Boolean) as string[];
+
+      const combinedValue = selectedMultiValues.join(",");
+      const combinedLabel = labels.join(", ");
+
+      // Store both the combined string and the arrays
+      onEditValue(combinedValue, combinedLabel);
+      handleClosePopover();
+    }
   };
 
   return (
@@ -211,44 +268,167 @@ export const FilterTag = ({
                 content: "p-0",
               },
               text: {
-                topLeft: "Options",
+                topLeft: needsDirectInput ? "Enter Value" : "Options",
               },
             }}
           >
-            <Command shouldFilter={false} className="space-y-2">
-              <CommandInput
-                placeholder="Search values..."
-                value={editSearchQuery}
-                onChange={(e) => setEditSearchQuery(e.target.value)}
-              />
-              <CommandList>
-                {isLoadingEditValues ? (
-                  <div className="text-muted-foreground flex items-center justify-center py-6 text-sm">
-                    <Loader2 className="mr-2 size-4 animate-spin" />
-                    Loading...
-                  </div>
-                ) : (
-                  <>
-                    {(() => {
-                      const categoryOption = options.find(
-                        (opt) => opt.category === query.category,
-                      );
-                      if (!categoryOption) return null;
+            {needsDirectInput ? (
+              <div className="space-y-2 p-3">
+                {(() => {
+                  const InputComponent = categoryOption
+                    ? getInputComponent(categoryOption.type)
+                    : null;
+                  if (!InputComponent) {
+                    return (
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={editDirectValue}
+                        onChange={(e) => setEditDirectValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleDirectInputSubmit();
+                          }
+                        }}
+                        placeholder="Enter value..."
+                        className="w-full rounded-md border px-3 py-2 text-sm"
+                        autoFocus
+                      />
+                    );
+                  }
+                  return (
+                    <InputComponent
+                      ref={inputRef}
+                      value={editDirectValue}
+                      onChange={setEditDirectValue}
+                      onSubmit={handleDirectInputSubmit}
+                      placeholder="Enter value..."
+                      autoFocus
+                      type={categoryOption?.type}
+                      min={categoryOption?.min}
+                      max={categoryOption?.max}
+                      step={categoryOption?.step}
+                    />
+                  );
+                })()}
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={handleClosePopover}
+                    className="hover:bg-accent rounded-md px-3 py-1 text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDirectInputSubmit}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1 text-sm"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Command shouldFilter={false} className="space-y-2">
+                <CommandInput
+                  placeholder="Search values..."
+                  value={editSearchQuery}
+                  onChange={(e) => setEditSearchQuery(e.target.value)}
+                />
+                <CommandList>
+                  {isLoadingEditValues ? (
+                    <div className="text-muted-foreground flex items-center justify-center py-6 text-sm">
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      Loading...
+                    </div>
+                  ) : (
+                    <>
+                      {(() => {
+                        const categoryOption = options.find(
+                          (opt) => opt.category === query.category,
+                        );
+                        if (!categoryOption) return null;
 
-                      const displayValues =
-                        categoryOption.useAsyncValues && onFetchValues
-                          ? editAsyncValues
-                          : categoryOption.values;
+                        const displayValues =
+                          categoryOption.useAsyncValues && onFetchValues
+                            ? editAsyncValues
+                            : categoryOption.values || [];
 
-                      return displayValues
-                        .filter((valueOption) =>
-                          editSearchQuery
-                            ? valueOption.label
-                                .toLowerCase()
-                                .includes(editSearchQuery.toLowerCase())
-                            : true,
-                        )
-                        .map((valueOption) => (
+                        const filteredValues = displayValues.filter(
+                          (valueOption) =>
+                            editSearchQuery
+                              ? valueOption.label
+                                  .toLowerCase()
+                                  .includes(editSearchQuery.toLowerCase())
+                              : true,
+                        );
+
+                        if (isMultiSelect) {
+                          return (
+                            <>
+                              {filteredValues.map((valueOption) => {
+                                const isSelected = selectedMultiValues.includes(
+                                  valueOption.value,
+                                );
+                                return (
+                                  <CommandItem
+                                    key={valueOption.value}
+                                    onSelect={() =>
+                                      handleMultiSelectToggle(
+                                        valueOption.value,
+                                        valueOption.label,
+                                      )
+                                    }
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div
+                                        className={cn(
+                                          "flex size-4 items-center justify-center rounded border",
+                                          isSelected
+                                            ? "border-primary bg-primary"
+                                            : "border-muted",
+                                        )}
+                                      >
+                                        {isSelected && (
+                                          <svg
+                                            className="text-primary-foreground size-3"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M5 13l4 4L19 7"
+                                            />
+                                          </svg>
+                                        )}
+                                      </div>
+                                      {valueOption.icon}
+                                      {valueOption.label}
+                                    </div>
+                                  </CommandItem>
+                                );
+                              })}
+                              {selectedMultiValues.length > 0 && (
+                                <div className="border-t p-2">
+                                  <button
+                                    type="button"
+                                    onClick={handleMultiSelectApply}
+                                    className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-md px-3 py-1.5 text-sm"
+                                  >
+                                    Apply ({selectedMultiValues.length}{" "}
+                                    selected)
+                                  </button>
+                                </div>
+                              )}
+                            </>
+                          );
+                        }
+
+                        return filteredValues.map((valueOption) => (
                           <CommandItem
                             key={valueOption.value}
                             onSelect={() => {
@@ -260,11 +440,12 @@ export const FilterTag = ({
                             {valueOption.label}
                           </CommandItem>
                         ));
-                    })()}
-                  </>
-                )}
-              </CommandList>
-            </Command>
+                      })()}
+                    </>
+                  )}
+                </CommandList>
+              </Command>
+            )}
           </PopoverContent>
         </Popover>
       )}

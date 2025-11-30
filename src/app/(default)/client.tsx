@@ -40,27 +40,86 @@ const Client = () => {
   };
 
   const searchOptions = [
+    // TEXT type - supports text operators
     {
-      category: "project",
-      label: "Project",
-      type: "PROJECT",
-      values: [
-        { value: "demo-project", label: "Demo project" },
-        { value: "web-app", label: "Web App" },
-        { value: "mobile-app", label: "Mobile App" },
-      ],
+      category: "title",
+      label: "Title",
+      type: "TEXT" as const,
+      values: [],
     },
+    // TEXT_AREA type - supports text operators
+    {
+      category: "description",
+      label: "Description",
+      type: "TEXT_AREA" as const,
+      values: [],
+    },
+    // NUMBER type - supports numeric operators and comparisons
+    {
+      category: "priority-level",
+      label: "Priority Level",
+      type: "NUMBER" as const,
+      values: [],
+      min: 1,
+      max: 10,
+      step: 1,
+    },
+    // DATE type - supports date operators and comparisons
+    {
+      category: "due-date",
+      label: "Due Date",
+      type: "DATE" as const,
+      values: [],
+    },
+    // DATE_TIME type - supports datetime operators and comparisons
+    {
+      category: "created-at",
+      label: "Created At",
+      type: "DATE_TIME" as const,
+      values: [],
+    },
+    // TIME type - supports time operators and comparisons
+    {
+      category: "time-estimate",
+      label: "Time Estimate",
+      type: "TIME" as const,
+      values: [],
+    },
+    // BOOLEAN type - supports boolean operators
+    {
+      category: "is-urgent",
+      label: "Is Urgent",
+      type: "BOOLEAN" as const,
+      values: [],
+    },
+    // LINK type - supports text operators
+    {
+      category: "external-link",
+      label: "External Link",
+      type: "LINK" as const,
+      values: [],
+    },
+    // USER type - supports user-specific operators with async values
     {
       category: "assignee",
       label: "Assignee",
-      type: "USER",
+      type: "USER" as const,
       values: [],
-      useAsyncValues: true, // Use async fetching for this category
+      useAsyncValues: true,
     },
+    // USER_LIST type - supports multi-user operators
+    {
+      category: "watchers",
+      label: "Watchers",
+      type: "USER_LIST" as const,
+      values: [],
+      useAsyncValues: true,
+    },
+    // SELECT type - supports selection operators
     {
       category: "priority",
       label: "Priority",
-      type: "SELECT",
+      type: "SELECT" as const,
       values: [
         { value: "low", label: "Low" },
         { value: "normal", label: "Normal" },
@@ -68,10 +127,23 @@ const Client = () => {
         { value: "critical", label: "Critical" },
       ],
     },
+    // MULTI_SELECT type - supports multi-selection operators
+    {
+      category: "tags",
+      label: "Tags",
+      type: "MULTI_SELECT" as const,
+      values: [
+        { value: "bug", label: "Bug" },
+        { value: "feature", label: "Feature" },
+        { value: "enhancement", label: "Enhancement" },
+        { value: "documentation", label: "Documentation" },
+      ],
+    },
+    // STATE type - supports state operators
     {
       category: "status",
       label: "Status",
-      type: "STATE",
+      type: "STATE" as const,
       values: [
         { value: "open", label: "Open" },
         { value: "in-progress", label: "In Progress" },
@@ -79,10 +151,22 @@ const Client = () => {
         { value: "closed", label: "Closed" },
       ],
     },
+    // MULTI_SELECT type for projects - supports multiple project selection
+    {
+      category: "project",
+      label: "Project",
+      type: "MULTI_SELECT" as const,
+      values: [
+        { value: "demo-project", label: "Demo project" },
+        { value: "web-app", label: "Web App" },
+        { value: "mobile-app", label: "Mobile App" },
+      ],
+    },
+    // FILE type - supports file operators
     {
       category: "attachments",
       label: "Attachments",
-      type: "FILE",
+      type: "FILE" as const,
       values: [],
     },
   ];

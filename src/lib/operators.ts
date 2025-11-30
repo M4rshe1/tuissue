@@ -24,7 +24,6 @@ export const OPERATORS: Record<string, Operator> = {
       "CALCULATED",
       "LINK",
       "STATE",
-      "PROJECT",
     ],
   },
   NOT_EQUALS: {
@@ -45,7 +44,6 @@ export const OPERATORS: Record<string, Operator> = {
       "CALCULATED",
       "LINK",
       "STATE",
-      "PROJECT",
     ],
   },
   CONTAINS: {
@@ -64,13 +62,13 @@ export const OPERATORS: Record<string, Operator> = {
     label: "starts with",
     value: "STARTS_WITH",
     selfClearing: false,
-    types: ["TEXT"],
+    types: ["TEXT", "LINK"],
   },
   ENDS_WITH: {
     label: "ends with",
     value: "ENDS_WITH",
     selfClearing: false,
-    types: ["TEXT"],
+    types: ["TEXT", "LINK"],
   },
   NOT_STARTS_WITH: {
     label: "does not start with",
@@ -112,13 +110,13 @@ export const OPERATORS: Record<string, Operator> = {
     label: "is one of",
     value: "IS_IN",
     selfClearing: false,
-    types: ["SELECT", "USER", "MULTI_SELECT", "USER_LIST", "STATE", "PROJECT"],
+    types: ["SELECT", "USER", "MULTI_SELECT", "USER_LIST", "STATE"],
   },
   IS_NOT_IN: {
     label: "is not one of",
     value: "IS_NOT_IN",
     selfClearing: false,
-    types: ["SELECT", "USER", "MULTI_SELECT", "USER_LIST", "STATE", "PROJECT"],
+    types: ["SELECT", "USER", "MULTI_SELECT", "USER_LIST", "STATE"],
   },
   IS_EMPTY: {
     label: "is empty",

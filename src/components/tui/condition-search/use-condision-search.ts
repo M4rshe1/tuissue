@@ -6,6 +6,7 @@ import type {
   ConditionSearchOptionValue,
 } from "./types";
 import { getOperatorsForType } from "./utils";
+import { requiresValueSelection, requiresDirectInput } from "./field-inputs";
 
 type UseConditionSearchProps = {
   options: ConditionSearchOption[];
@@ -125,7 +126,7 @@ export const useConditionSearch = ({
   const getValueLabel = useCallback(
     (category: string, value: string) => {
       const option = options.find((opt) => opt.category === category);
-      const valueOption = option?.values.find((v) => v.value === value);
+      const valueOption = option?.values?.find((v) => v.value === value);
       return valueOption?.label || value;
     },
     [options],
@@ -150,8 +151,10 @@ export const useConditionSearch = ({
           OPERATORS_CONFIG[firstOperator as keyof typeof OPERATORS_CONFIG];
         const requiresValue = !operatorConfig?.selfClearing;
 
-        const hasStaticValues = categoryOption.values.length > 0;
+        const hasStaticValues = (categoryOption.values?.length ?? 0) > 0;
         const usesAsyncValues = categoryOption.useAsyncValues && onFetchValues;
+        const needsDirectInput = requiresDirectInput(categoryOption.type);
+        const needsValueSelection = requiresValueSelection(categoryOption.type);
 
         const newQuery: StructuredQuery = {
           category,
@@ -164,7 +167,14 @@ export const useConditionSearch = ({
         setStructuredQuery(newQueries);
         onChange?.(newQueries);
 
-        if (!requiresValue || (!hasStaticValues && !usesAsyncValues)) {
+        // Auto-close if no value is needed or if it's a self-clearing operator
+        if (
+          !requiresValue ||
+          (!needsValueSelection &&
+            !needsDirectInput &&
+            !hasStaticValues &&
+            !usesAsyncValues)
+        ) {
           setSelectedCategory(null);
           setSelectedOperator(null);
           setTextQuery("");
@@ -187,10 +197,18 @@ export const useConditionSearch = ({
           OPERATORS_CONFIG[operator as keyof typeof OPERATORS_CONFIG];
         const requiresValue = !operatorConfig?.selfClearing;
 
-        const hasStaticValues = category.values.length > 0;
+        const hasStaticValues = (category.values?.length ?? 0) > 0;
         const usesAsyncValues = category.useAsyncValues && onFetchValues;
+        const needsDirectInput = requiresDirectInput(category.type);
+        const needsValueSelection = requiresValueSelection(category.type);
 
-        if (!requiresValue || (!hasStaticValues && !usesAsyncValues)) {
+        if (
+          !requiresValue ||
+          (!needsValueSelection &&
+            !needsDirectInput &&
+            !hasStaticValues &&
+            !usesAsyncValues)
+        ) {
           const newQuery: StructuredQuery = {
             category: selectedCategory!,
             operator,
@@ -362,7 +380,7 @@ export const useConditionSearch = ({
     if (currentCategory.useAsyncValues && onFetchValues) {
       return asyncValues;
     }
-    return currentCategory.values;
+    return currentCategory.values || [];
   }, [currentCategory, asyncValues, onFetchValues]);
 
   return {
