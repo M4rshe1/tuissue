@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "@/components/tui/toaster";
 import { Box } from "@/components/tui/box";
+import { useShortcuts } from "@/providers/shortcuts-provider";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -31,6 +32,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 const LoginClient = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { addShortcut, removeShortcut } = useShortcuts();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -77,6 +79,20 @@ const LoginClient = () => {
     }
   };
 
+  useEffect(() => {
+    addShortcut({
+      id: "cancel-login",
+      label: "Home",
+      letters: ["ESC"],
+      action: () => {
+        router.push("/");
+      },
+    });
+    return () => {
+      removeShortcut("cancel-login");
+    };
+  }, []);
+
   return (
     <Box
       style={{
@@ -84,15 +100,6 @@ const LoginClient = () => {
         box: "h-full",
         content: "flex items-center justify-center",
       }}
-      shortcuts={[
-        {
-          label: "Home",
-          letters: ["ESC"],
-          action: () => {
-            router.push("/");
-          },
-        },
-      ]}
       text={{
         topLeft: <span className="text-foreground">Login</span>,
         bottomLeft: <span className="text-muted-foreground">/auth/login</span>,

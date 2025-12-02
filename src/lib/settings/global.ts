@@ -30,12 +30,18 @@ interface GlobalSettingList extends GlobalSettingBase {
   type: "list";
 }
 
+interface GlobalSettingUserList extends GlobalSettingBase {
+  defaultValue: string[];
+  type: "user_list";
+}
+
 type GlobalSetting =
   | GlobalSettingBoolean
   | GlobalSettingString
   | GlobalSettingEnum
   | GlobalSettingEnumList
-  | GlobalSettingList;
+  | GlobalSettingList
+  | GlobalSettingUserList;
 
 export const GLOBAL_SETTINGS: Record<string, GlobalSetting> = {
   ALLOW_SIGNUP: {
@@ -102,7 +108,7 @@ export const GLOBAL_SETTINGS: Record<string, GlobalSetting> = {
   },
   CUSTOM_CREATE_PROJECT_USERS: {
     key: "CUSTOM_CREATE_PROJECT_USERS",
-    type: "list",
+    type: "user_list",
     defaultValue: [],
   },
 };

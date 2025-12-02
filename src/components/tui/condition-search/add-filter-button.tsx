@@ -191,7 +191,11 @@ export const AddFilterButton = ({
         <Command className="space-y-2">
           {!selectedCategory ? (
             <>
-              <CommandInput placeholder="Search categories..." />
+              <CommandInput
+                placeholder="Search categories..."
+                defaultValue={valueSearchQuery}
+                onChange={(e) => onValueSearchQueryChange(e.target.value)}
+              />
               <CommandList>
                 {options.map((option) => (
                   <CommandItem
@@ -205,7 +209,11 @@ export const AddFilterButton = ({
             </>
           ) : !selectedOperator ? (
             <>
-              <CommandInput placeholder="Search operators..." />
+              <CommandInput
+                placeholder="Search operators..."
+                defaultValue={valueSearchQuery}
+                onChange={(e) => onValueSearchQueryChange(e.target.value)}
+              />
               <CommandList>
                 <CommandEmpty>No operator found.</CommandEmpty>
                 {availableOperators.map((operator) => (

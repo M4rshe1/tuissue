@@ -172,14 +172,22 @@
     1px 2px 5px 1px hsl(0 0% 0% / 0.06), 1px 8px 10px 0px hsl(0 0% 0% / 0.06);
   --shadow-2xl: 1px 2px 5px 1px hsl(0 0% 0% / 0.15);
 
-  --info: oklch(0.35 0.15 240);
+  --info: oklch(0.65 0.15 240);
   --info-foreground: oklch(0.95 0.05 240);
-  --success: oklch(0.4 0.18 145);
+  --success: oklch(0.6 0.18 145);
   --success-foreground: oklch(0.95 0.05 145);
-  --warning: oklch(0.55 0.18 70);
+  --warning: oklch(0.75 0.18 70);
   --warning-foreground: oklch(0.15 0.1 70);
   --error: oklch(0.6 0.22 25);
   --error-foreground: oklch(0.98 0 0);
+
+  /* Heading colors */
+  --h1: oklch(0.3651 0.0325 287.0807);
+  --h2: oklch(0.3651 0.0325 287.0807);
+  --h3: oklch(0.3651 0.0325 287.0807);
+  --h4: oklch(0.3651 0.0325 287.0807);
+  --h5: oklch(0.3651 0.0325 287.0807);
+  --h6: oklch(0.3651 0.0325 287.0807);
 }
 
 @layer base {

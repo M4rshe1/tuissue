@@ -7,10 +7,54 @@ import { useGlobalSettings } from "@/queries/setting";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { PopoverContent } from "@/components/tui/popover";
 import { Search } from "./search";
+import { revalidateAny } from "@/lib/get-query-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useShortcuts } from "@/providers/shortcuts-provider";
 
 const Header = () => {
   const { data: session } = authClient.useSession();
   const { data: allowSignup } = useGlobalSettings(["ALLOW_SIGNUP"]);
+  const router = useRouter();
+  const { addShortcuts, removeShortcuts } = useShortcuts();
+
+  useEffect(() => {
+    if (session) {
+      addShortcuts([
+        {
+          id: "profile",
+          label: "Profile",
+          letters: ["P"],
+          action: () => {
+            router.push(`/user/profile/${session.user.id}`);
+          },
+        },
+      ]);
+    } else {
+      addShortcuts([
+        {
+          id: "login",
+          label: "Login",
+          letters: ["L"],
+          action: () => {
+            router.push("/auth/login");
+          },
+        },
+        {
+          id: "register",
+          label: "Register",
+          letters: ["R"],
+          action: () => {
+            router.push("/auth/register");
+          },
+        },
+      ]);
+    }
+    return () => {
+      removeShortcuts(["profile", "login", "register"]);
+    };
+  }, [session]);
   return (
     <header>
       <Box
@@ -19,20 +63,25 @@ const Header = () => {
         }}
       >
         <div className="grid text-sm md:grid-cols-3">
-          <Link href="/" className="flex items-center hover:underline">
-            <span className="font-bold">
-              <span className="text-foreground">T</span>
-              <span className="text-muted-foreground">u</span>
-              <span className="text-foreground">I</span>
-              <span className="text-muted-foreground">s</span>
-              <span className="text-muted-foreground">s</span>
-              <span className="text-muted-foreground">u</span>
-              <span className="text-muted-foreground">e</span>
-              <span className="text-muted-foreground"></span>
-            </span>
-            <span className="bg-foreground h-[1em] w-2 animate-pulse"></span>
-          </Link>
-          <div className="flex items-center justify-end">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center hover:underline">
+              <span className="font-bold">
+                <span className="text-foreground">T</span>
+                <span className="text-muted-foreground">u</span>
+                <span className="text-foreground">I</span>
+                <span className="text-muted-foreground">s</span>
+                <span className="text-muted-foreground">s</span>
+                <span className="text-muted-foreground">u</span>
+                <span className="text-muted-foreground">e</span>
+                <span className="text-muted-foreground"></span>
+              </span>
+              <span className="bg-foreground h-[1em] w-2 animate-pulse"></span>
+            </Link>
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <Link href="/projects" className="text-foreground hover:underline">
+              Projects
+            </Link>
             <Search />
           </div>
           <div className="flex items-center justify-end">
@@ -63,6 +112,9 @@ const Header = () => {
                   boxProps={{
                     text: {
                       topLeft: <span className="text-foreground">User</span>,
+                    },
+                    style: {
+                      background: "bg-popover",
                     },
                   }}
                 >
@@ -105,12 +157,20 @@ const Header = () => {
                           Settings
                         </span>
                       </Link>
-                      <Link
-                        href="/auth/logout"
+                      <div
+                        onClick={async () => {
+                          const signoutResult = await authClient.signOut();
+                          if (signoutResult.error) {
+                            toast.error(signoutResult.error.message);
+                            return;
+                          }
+                          revalidateAny("any");
+                          router.refresh();
+                        }}
                         className="flex items-center hover:underline"
                       >
                         <span className="text-foreground text-sm">Logout</span>
-                      </Link>
+                      </div>
                     </div>
                   </div>
                 </PopoverContent>

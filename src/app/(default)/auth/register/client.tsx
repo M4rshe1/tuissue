@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "@/components/tui/toaster";
 import { Box } from "@/components/tui/box";
+import { useShortcuts } from "@/providers/shortcuts-provider";
 
 const registerSchema = z
   .object({
@@ -38,6 +39,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 const RegisterClient = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { addShortcut, removeShortcut } = useShortcuts();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -87,6 +89,20 @@ const RegisterClient = () => {
     }
   };
 
+  useEffect(() => {
+    addShortcut({
+      id: "cancel-register",
+      label: "Home",
+      letters: ["ESC"],
+      action: () => {
+        router.push("/");
+      },
+    });
+    return () => {
+      removeShortcut("cancel-register");
+    };
+  }, []);
+
   return (
     <Box
       style={{
@@ -94,15 +110,6 @@ const RegisterClient = () => {
         box: "h-full",
         content: "flex items-center justify-center",
       }}
-      shortcuts={[
-        {
-          label: "Home",
-          letters: ["ESC"],
-          action: () => {
-            router.push("/");
-          },
-        },
-      ]}
       text={{
         topLeft: <span className="text-foreground">Register</span>,
         bottomLeft: (

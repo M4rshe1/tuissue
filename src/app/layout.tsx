@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { FormDialogProvider } from "@/providers/form-dialog-provider";
 import { QueryClientProvider } from "@/providers/query-client-provider";
+import { ShortcutsProvider } from "@/providers/shortcuts-provider";
 import "@/styles/globals.css";
 
 import { type Metadata } from "next";
@@ -31,11 +32,13 @@ export default function RootLayout({
       <body className="font-monospace h-screen overflow-hidden">
         <ThemeProvider>
           <QueryClientProvider>
-            <FormDialogProvider>
-              <div className="h-full max-h-screen overflow-hidden">
-                {children}
-              </div>
-            </FormDialogProvider>
+            <ShortcutsProvider>
+              <FormDialogProvider>
+                <div className="h-full max-h-screen overflow-hidden">
+                  {children}
+                </div>
+              </FormDialogProvider>
+            </ShortcutsProvider>
           </QueryClientProvider>
           <Toaster richColors position="bottom-right" />
         </ThemeProvider>

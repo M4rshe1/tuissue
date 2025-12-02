@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { SearchIcon, Hash, Folder } from "lucide-react";
+import { SearchIcon, Hash, Folder, InfoIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -10,7 +10,6 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList,
 } from "@/components/tui/command";
 import { Button } from "./ui/button";
 import { useSearchIssuesQuery } from "@/queries/issue";
@@ -19,6 +18,7 @@ import { Box } from "./tui/box";
 export function Search() {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hideTips, setHideTips] = useState(false);
   const router = useRouter();
   const { data: searchResults, isLoading } = useSearchIssuesQuery(
     searchQuery,
@@ -51,6 +51,10 @@ export function Search() {
     setSearchQuery("");
   };
 
+  const toggleTips = () => {
+    setHideTips(!hideTips);
+  };
+
   return (
     <>
       <Button size="xs" onClick={() => setOpen(true)}>
@@ -67,6 +71,9 @@ export function Search() {
               </div>
             ),
           },
+          style: {
+            background: "bg-background",
+          },
         }}
         open={open}
         onOpenChange={(newOpen) => {
@@ -81,64 +88,68 @@ export function Search() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <CommandList>
-          {isLoading && (
+        {isLoading && (
+          <Box>
             <div className="text-muted-foreground py-6 text-center text-sm">
               Searching...
             </div>
-          )}
-          {!isLoading &&
-            issues.length === 0 &&
-            projects.length === 0 &&
-            searchQuery && <CommandEmpty>No results found.</CommandEmpty>}
-          {!isLoading && projects.length > 0 && (
-            <CommandGroup text={{ topLeft: "Options" }}>
-              {projects.map((project) => (
-                <CommandItem
-                  key={project.id}
-                  onSelect={() => handleSelectProject(project.id)}
-                >
-                  <Folder className="size-4" />
-                  <span>{project.name}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-          {!isLoading && issues.length > 0 && (
-            <CommandGroup text={{ topLeft: "Issues" }}>
-              {issues.map((issue) => (
-                <CommandItem
-                  key={issue.id}
-                  onSelect={() => handleSelectIssue(issue.id, issue.projectId)}
-                >
-                  <Hash className="size-4" />
-                  <span>
-                    {issue.project?.name && (
-                      <span className="text-muted-foreground">
-                        {issue.project.name} #
-                      </span>
-                    )}
-                    {issue.number}: {issue.title}
-                  </span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-          {!searchQuery && (
-            <Box text={{ topLeft: "Tips" }}>
-              <div className="flex flex-col gap-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <Hash className="size-4" />
-                  <span>Use #123 to search by issue number</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Folder className="size-4" />
-                  <span>Use @project-name to search for projects</span>
-                </div>
+          </Box>
+        )}
+        {!isLoading &&
+          issues.length === 0 &&
+          projects.length === 0 &&
+          searchQuery && <CommandEmpty>No results found.</CommandEmpty>}
+        {!isLoading && projects.length > 0 && (
+          <CommandGroup text={{ topLeft: "Options" }}>
+            {projects.map((project) => (
+              <CommandItem
+                key={project.id}
+                onSelect={() => handleSelectProject(project.id)}
+              >
+                <Folder className="size-4" />
+                <span>{project.name}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+        {!isLoading && issues.length > 0 && (
+          <CommandGroup text={{ topLeft: "Issues" }}>
+            {issues.map((issue) => (
+              <CommandItem
+                key={issue.id}
+                onSelect={() => handleSelectIssue(issue.id, issue.projectId)}
+              >
+                <Hash className="size-4" />
+                <span>
+                  {issue.project?.name && (
+                    <span className="text-muted-foreground">
+                      {issue.project.name} #
+                    </span>
+                  )}
+                  {issue.number}: {issue.title}
+                </span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+        {!hideTips && (
+          <Box
+            text={{ topLeft: "Tips" }}
+            style={{ box: "text-warning" }}
+            onClose={toggleTips}
+          >
+            <div className="flex flex-col gap-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Hash className="size-4" />
+                <span>Use #123 to search by issue number</span>
               </div>
-            </Box>
-          )}
-        </CommandList>
+              <div className="flex items-center gap-2">
+                <Folder className="size-4" />
+                <span>Use @project-name to search for projects</span>
+              </div>
+            </div>
+          </Box>
+        )}
       </CommandDialog>
     </>
   );

@@ -47,17 +47,7 @@ function PopoverContent({
         )}
         {...props}
       >
-        <Box
-          style={{
-            background: boxProps?.style?.background || "bg-card",
-            content: boxProps?.style?.content,
-            box: boxProps?.style?.box || "rounded-xs",
-          }}
-          shortcuts={boxProps?.shortcuts}
-          text={boxProps?.text}
-        >
-          {props.children}
-        </Box>
+        <Box {...boxProps}>{props.children}</Box>
       </PopoverPrimitive.Content>
     </PopoverPrimitive.Portal>
   );

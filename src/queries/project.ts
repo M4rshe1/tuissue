@@ -1,12 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
-import { searchProjectsAction } from "@/actions/project";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createProjectAction, searchProjectsAction } from "@/actions/project";
 import { toast } from "@/components/tui/toaster";
+import { z } from "zod";
+import type { StructuredQuery } from "@/components/tui/condition-search/types";
+import { revalidateAny } from "@/lib/get-query-client";
+import { PROJECT_VISIBILITY } from "@/lib/enums";
 
-export const useSearchProjectsQuery = (query: string) => {
+export const useSearchProjectsQuery = (
+  queries: StructuredQuery[],
+  textQuery: string,
+) => {
   return useQuery({
-    queryKey: ["search-projects", query],
+    queryKey: ["projects", queries, textQuery],
     queryFn: async () => {
-      const { data, error } = await searchProjectsAction({ query });
+      const { data, error } = await searchProjectsAction({
+        queries,
+        textQuery,
+      });
+      console.log(data, error);
       if (error) {
         toast({
           variant: "error",
@@ -16,6 +27,31 @@ export const useSearchProjectsQuery = (query: string) => {
         return null;
       }
       return data ?? [];
+    },
+  });
+};
+
+export const useCreateProjectMutation = () => {
+  return useMutation({
+    mutationFn: async (data: {
+      name: string;
+      description: string;
+      visibility: (typeof PROJECT_VISIBILITY)[keyof typeof PROJECT_VISIBILITY];
+      inheritCustomFields: boolean;
+    }) => {
+      const { data: projectData, error } = await createProjectAction(data);
+      if (error) {
+        toast({
+          variant: "error",
+          title: error.message,
+          description: error.details,
+        });
+        return null;
+      }
+      return projectData;
+    },
+    onSuccess: () => {
+      revalidateAny("projects");
     },
   });
 };
