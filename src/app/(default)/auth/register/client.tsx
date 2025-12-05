@@ -93,7 +93,8 @@ const RegisterClient = () => {
     addShortcut({
       id: "cancel-register",
       label: "Home",
-      letters: ["ESC"],
+      escKey: true,
+      letters: [],
       action: () => {
         router.push("/");
       },

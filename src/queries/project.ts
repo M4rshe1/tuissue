@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { StructuredQuery } from "@/components/tui/condition-search/types";
 import { revalidateAny } from "@/lib/get-query-client";
 import { PROJECT_VISIBILITY } from "@/lib/enums";
+import { valueIsValid } from "@/lib/condition-search";
 
 export const useSearchProjectsQuery = (
   queries: StructuredQuery[],
@@ -14,10 +15,14 @@ export const useSearchProjectsQuery = (
     queryKey: ["projects", queries, textQuery],
     queryFn: async () => {
       const { data, error } = await searchProjectsAction({
-        queries,
+        queries: queries
+          .filter((query) => valueIsValid(query.operator, query.value))
+          .map((query) => ({
+            ...query,
+            value: query.value ? JSON.stringify(query.value) : "",
+          })),
         textQuery,
       });
-      console.log(data, error);
       if (error) {
         toast({
           variant: "error",

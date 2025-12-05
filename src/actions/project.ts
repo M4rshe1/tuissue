@@ -1,4 +1,5 @@
 "use server";
+import { convertOperatorToPrisma } from "@/lib/condition-search";
 import {
   OPERATORS,
   PROJECT_VISIBILITY,
@@ -14,21 +15,49 @@ import z from "zod";
 const searchProjectsSchema = z.object({
   queries: z.array(
     z.object({
-      category: z.enum(Object.keys(OPERATORS) as [string, ...string[]]),
+      category: z.string(),
       operator: z.enum(Object.values(OPERATORS) as [string, ...string[]]),
       value: z.string(),
+      label: z.string().optional(),
+      valueLabel: z.string().optional(),
     }),
   ),
   textQuery: z.string(),
 });
 
+function parseQueryFilter(
+  queries: z.infer<typeof searchProjectsSchema>["queries"],
+): Record<string, any> {
+  return queries.reduce(
+    (
+      acc: Record<string, any>,
+      query: { category: string; operator: string; value: string },
+    ) => ({
+      ...acc,
+      [query.category]: convertOperatorToPrisma(query.operator, query.value),
+    }),
+    {},
+  );
+}
+
 export const searchProjectsAction = await actionOptionalAuth(
   searchProjectsSchema,
   async ({ data, session }) => {
     const { queries, textQuery } = data;
+    let prismaQueries = parseQueryFilter(queries);
+    prismaQueries = {
+      ...prismaQueries,
+      ...(textQuery !== ""
+        ? {
+            name: { contains: textQuery, mode: "insensitive" },
+            description: { contains: textQuery, mode: "insensitive" },
+          }
+        : {}),
+    };
+
     const projects = await db.project.findMany({
       where: {
-        name: { contains: textQuery, mode: "insensitive" },
+        ...prismaQueries,
         OR: [
           { visibility: PROJECT_VISIBILITY.PUBLIC },
           {

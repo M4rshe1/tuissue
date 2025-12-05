@@ -9,7 +9,7 @@ import { AddFilterButton } from "./add-filter-button";
 import { SearchInput } from "./search-input";
 import { useConditionSearch } from "./use-condision-search";
 import { getOperatorLabel } from "./utils";
-import type { ConditionSearchProps } from "./types";
+import type { ConditionSearchProps, StructuredQuery } from "./types";
 
 export * from "./types";
 
@@ -23,6 +23,9 @@ export const ConditionSearch = ({
   debounceMs = 300,
   boxProps,
 }: ConditionSearchProps & { boxProps?: BoxProps }) => {
+  function internalOnChange(queries: StructuredQuery[]) {
+    onChange?.(queries);
+  }
   const {
     structuredQuery,
     textQuery,
@@ -47,7 +50,7 @@ export const ConditionSearch = ({
   } = useConditionSearch({
     options,
     value,
-    onChange,
+    onChange: internalOnChange,
     onSearch,
     onFetchValues,
     debounceMs,

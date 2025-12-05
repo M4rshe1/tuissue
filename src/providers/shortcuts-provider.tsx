@@ -18,6 +18,7 @@ export type Shortcut = {
   altKey?: boolean;
   metaKey?: boolean;
   letters: string[];
+  escKey?: boolean;
   action: (event: KeyboardEvent | "trigger") => void;
 };
 
@@ -100,10 +101,7 @@ export function ShortcutsProvider({
 
       const currentShortcuts = shortcutsRef.current;
       for (const shortcut of currentShortcuts) {
-        const lettersMatch = shortcut.letters.every((letter) =>
-          event.key.toLowerCase().includes(letter.toLowerCase()),
-        );
-        if (!lettersMatch) continue;
+        if (shortcut.escKey && event.key !== "Escape") continue;
         if (shortcut.ctrlKey && !event.ctrlKey) continue;
         if (shortcut.shiftKey && !event.shiftKey) continue;
         if (shortcut.altKey && !event.altKey) continue;
@@ -112,7 +110,10 @@ export function ShortcutsProvider({
         if (!shortcut.shiftKey && event.shiftKey) continue;
         if (!shortcut.altKey && event.altKey) continue;
         if (!shortcut.metaKey && event.metaKey) continue;
-
+        const lettersMatch = shortcut.letters.every(
+          (letter) => event.key.toLowerCase() === letter.toLowerCase(),
+        );
+        if (!lettersMatch) continue;
         event.preventDefault();
         shortcut.action(event);
         break;

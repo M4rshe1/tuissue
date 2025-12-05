@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { ConditionSearch } from "@/components/tui/condition-search/index";
-import type { StructuredQuery } from "@/components/tui/condition-search/types";
+import type {
+  ConditionSearchOption,
+  StructuredQuery,
+} from "@/components/tui/condition-search/types";
 import Table from "@/components/tui/table";
 import type { colDef } from "@/components/tui/table/types";
 import { Button } from "@/components/ui/button";
@@ -54,6 +56,12 @@ const ProjectsClient = () => {
       type: "DATE_TIME" as const,
       values: [],
     },
+    {
+      category: "updated-at",
+      label: "Updated At",
+      type: "DATE_TIME" as const,
+      values: [],
+    },
   ];
 
   const columns: colDef<Project>[] = [
@@ -84,7 +92,12 @@ const ProjectsClient = () => {
     {
       label: "Created At",
       key: "createdAt",
-      cell: (row) => new Date(row.createdAt).toLocaleDateString(),
+      cell: (row) => new Date(row.createdAt).toISOString(),
+    },
+    {
+      label: "Updated At",
+      key: "updatedAt",
+      cell: (row) => new Date(row.updatedAt).toISOString(),
     },
   ];
 
@@ -105,7 +118,7 @@ const ProjectsClient = () => {
     >
       <div className="flex items-center justify-between">
         <ConditionSearch
-          options={searchOptions}
+          options={searchOptions as ConditionSearchOption[]}
           value={queries}
           onChange={setQueries}
           onSearch={handleSearchQueries}
@@ -117,10 +130,15 @@ const ProjectsClient = () => {
             },
           }}
         />
-        <Button asChild>
+        <Button
+          asChild
+          className="group mr-2 flex items-center gap-0 transition-all duration-300 hover:gap-2"
+        >
           <Link href="/projects/new">
             <Plus className="size-4" />
-            New Project
+            <span className="max-w-0 overflow-hidden whitespace-nowrap transition-all duration-300 group-hover:max-w-xs">
+              New Project
+            </span>
           </Link>
         </Button>
       </div>

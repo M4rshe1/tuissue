@@ -40,6 +40,19 @@ export const useConditionSearch = ({
   const [valueSearchQuery, setValueSearchQuery] = useState("");
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  function internalOnChange(queries: StructuredQuery[]) {
+    onChange?.(queries);
+  }
+  function internalOnSearch(queries: StructuredQuery[], textQuery: string) {
+    onSearch?.(
+      queries.map((query) => ({
+        ...query,
+        value: query.value ? JSON.parse(query.value) : "",
+      })),
+      textQuery,
+    );
+  }
+
   useEffect(() => {
     if (value !== structuredQuery) {
       setStructuredQuery(value);
@@ -165,7 +178,7 @@ export const useConditionSearch = ({
         };
         const newQueries = [...structuredQuery, newQuery];
         setStructuredQuery(newQueries);
-        onChange?.(newQueries);
+        internalOnChange(newQueries);
 
         // Auto-close if no value is needed or if it's a self-clearing operator
         if (
@@ -218,7 +231,7 @@ export const useConditionSearch = ({
           };
           const newQueries = [...structuredQuery, newQuery];
           setStructuredQuery(newQueries);
-          onChange?.(newQueries);
+          internalOnChange(newQueries);
           setSelectedCategory(null);
           setSelectedOperator(null);
           setValueSearchQuery("");
@@ -266,7 +279,7 @@ export const useConditionSearch = ({
               valueLabel: label,
             };
             setStructuredQuery(updatedQueries);
-            onChange?.(updatedQueries);
+            internalOnChange(updatedQueries);
           }
         } else {
           const newQuery: StructuredQuery = {
@@ -278,7 +291,7 @@ export const useConditionSearch = ({
           };
           const newQueries = [...structuredQuery, newQuery];
           setStructuredQuery(newQueries);
-          onChange?.(newQueries);
+          internalOnChange(newQueries);
         }
 
         setSelectedCategory(null);
@@ -303,7 +316,7 @@ export const useConditionSearch = ({
     (index: number) => {
       const newQueries = structuredQuery.filter((_, i) => i !== index);
       setStructuredQuery(newQueries);
-      onChange?.(newQueries);
+      internalOnChange(newQueries);
     },
     [structuredQuery, onChange],
   );
@@ -324,7 +337,7 @@ export const useConditionSearch = ({
           valueLabel: isSelfClearing ? "" : existingQuery.valueLabel,
         };
         setStructuredQuery(updatedQueries);
-        onChange?.(updatedQueries);
+        internalOnChange(updatedQueries);
       }
     },
     [structuredQuery, onChange],
@@ -343,7 +356,7 @@ export const useConditionSearch = ({
           valueLabel: label,
         };
         setStructuredQuery(updatedQueries);
-        onChange?.(updatedQueries);
+        internalOnChange(updatedQueries);
       }
     },
     [structuredQuery, onChange, getValueLabel],
@@ -352,7 +365,7 @@ export const useConditionSearch = ({
   const handleClearAll = useCallback(() => {
     setStructuredQuery([]);
     setTextQuery("");
-    onChange?.([]);
+    internalOnChange([]);
   }, [onChange]);
 
   function cleanupInvalidConditions() {
@@ -366,13 +379,13 @@ export const useConditionSearch = ({
 
     if (validQueries.length !== structuredQuery.length) {
       setStructuredQuery(validQueries);
-      onChange?.(validQueries);
+      internalOnChange(validQueries);
     }
   }
 
   const handleSearch = useCallback(() => {
     cleanupInvalidConditions();
-    onSearch?.(structuredQuery, textQuery);
+    internalOnSearch(structuredQuery, textQuery);
   }, [onSearch, structuredQuery, textQuery]);
 
   const getDisplayValues = useCallback(() => {

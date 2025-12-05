@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/tui/toaster";
-import { ConditionSearch } from "@/components/tui/condition-search/index";
+import {
+  ConditionSearch,
+  type ConditionSearchOption,
+} from "@/components/tui/condition-search/index";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const Client = () => {
@@ -185,7 +188,7 @@ const Client = () => {
       <div className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold">Condition Search Example</h2>
         <ConditionSearch
-          options={searchOptions}
+          options={searchOptions as ConditionSearchOption[]}
           value={queries}
           onChange={setQueries}
           onSearch={handleSearch}

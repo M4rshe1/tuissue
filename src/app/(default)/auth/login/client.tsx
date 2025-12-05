@@ -83,7 +83,8 @@ const LoginClient = () => {
     addShortcut({
       id: "cancel-login",
       label: "Home",
-      letters: ["ESC"],
+      escKey: true,
+      letters: [],
       action: () => {
         router.push("/");
       },

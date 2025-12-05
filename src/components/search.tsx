@@ -15,8 +15,13 @@ import { Button } from "./ui/button";
 import { useSearchIssuesQuery } from "@/queries/issue";
 import { Box } from "./tui/box";
 
-export function Search() {
-  const [open, setOpen] = useState(false);
+export function Search({
+  open,
+  setOpen,
+}: {
+  open: boolean;
+  setOpen: (open: boolean | ((open: boolean) => boolean)) => void;
+}) {
   const [searchQuery, setSearchQuery] = useState("");
   const [hideTips, setHideTips] = useState(false);
   const router = useRouter();

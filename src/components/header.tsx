@@ -10,12 +10,13 @@ import { Search } from "./search";
 import { revalidateAny } from "@/lib/get-query-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useShortcuts } from "@/providers/shortcuts-provider";
 
 const Header = () => {
   const { data: session } = authClient.useSession();
   const { data: allowSignup } = useGlobalSettings(["ALLOW_SIGNUP"]);
+  const [searchOpen, setSearchOpen] = useState(false);
   const router = useRouter();
   const { addShortcuts, removeShortcuts } = useShortcuts();
 
@@ -28,6 +29,15 @@ const Header = () => {
           letters: ["P"],
           action: () => {
             router.push(`/user/profile/${session.user.id}`);
+          },
+        },
+        {
+          id: "search",
+          label: "Search",
+          ctrlKey: true,
+          letters: ["K"],
+          action: () => {
+            setSearchOpen(true);
           },
         },
       ]);
@@ -52,7 +62,7 @@ const Header = () => {
       ]);
     }
     return () => {
-      removeShortcuts(["profile", "login", "register"]);
+      removeShortcuts(["profile", "login", "register", "search"]);
     };
   }, [session]);
   return (
@@ -82,7 +92,7 @@ const Header = () => {
             <Link href="/projects" className="text-foreground hover:underline">
               Projects
             </Link>
-            <Search />
+            <Search open={searchOpen} setOpen={setSearchOpen} />
           </div>
           <div className="flex items-center justify-end">
             {session ? (
@@ -111,7 +121,7 @@ const Header = () => {
                   className="w-fit"
                   boxProps={{
                     text: {
-                      topLeft: <span className="text-foreground">User</span>,
+                      topLeft: <span className="text-foreground">Profile</span>,
                     },
                     style: {
                       background: "bg-popover",
@@ -127,8 +137,8 @@ const Header = () => {
                           className="h-10 w-10 rounded-full"
                         />
                       ) : (
-                        <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-full">
-                          <span className="text-foreground text-base">
+                        <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-full">
+                          <span className="text-primary-foreground text-base">
                             {session.user.name?.[0]?.toUpperCase() || "U"}
                           </span>
                         </div>
@@ -158,6 +168,7 @@ const Header = () => {
                         </span>
                       </Link>
                       <div
+                        role="button"
                         onClick={async () => {
                           const signoutResult = await authClient.signOut();
                           if (signoutResult.error) {
@@ -167,7 +178,7 @@ const Header = () => {
                           revalidateAny("any");
                           router.refresh();
                         }}
-                        className="flex items-center hover:underline"
+                        className="flex cursor-pointer items-center hover:underline"
                       >
                         <span className="text-foreground text-sm">Logout</span>
                       </div>

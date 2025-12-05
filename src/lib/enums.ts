@@ -52,7 +52,6 @@ export const CUSTOM_FIELD_TYPE = {
   FILE: "FILE",
   STATE: "STATE",
   CALCULATED: "CALCULATED",
-  DATE_TIME: "DATE_TIME",
   TIME: "TIME",
 } as const;
 

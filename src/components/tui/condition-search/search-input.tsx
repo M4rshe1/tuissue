@@ -211,11 +211,11 @@ export const SearchInput = ({
         onFocus={handleFocus}
         className="text-foreground w-full min-w-0 text-sm outline-none focus:ring-0 focus:ring-offset-0"
       />
-      {showDirectInput && (
+      {/* {showDirectInput && (
         <div className="text-muted-foreground absolute top-0 right-0 text-xs">
           Press Enter to apply
         </div>
-      )}
+      )} */}
       <Popover
         open={isPopoverOpen}
         onOpenChange={(open) => {
