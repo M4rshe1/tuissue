@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ConditionSearch } from "@/components/tui/condition-search/index";
 import type {
   ConditionSearchOption,
@@ -18,6 +18,8 @@ import type {
 } from "generated/prisma/client";
 import { Box } from "@/components/tui/box";
 import Link from "next/link";
+import { useShortcuts } from "@/providers/shortcuts-provider";
+import { useRouter } from "next/navigation";
 
 type Project = DbProject & {
   userProjects: DbUserProject[];
@@ -27,6 +29,23 @@ const ProjectsClient = () => {
   const [queries, setQueries] = useState<StructuredQuery[]>([]);
   const [textQuery, setTextQuery] = useState("");
   const { data: projects } = useSearchProjectsQuery(queries, textQuery);
+  const { addShortcut, removeShortcut } = useShortcuts();
+  const router = useRouter();
+
+  useEffect(() => {
+    addShortcut({
+      id: "new-project",
+      label: "New Project",
+      ctrlKey: true,
+      letters: ["N"],
+      action: () => {
+        router.push("/projects/new");
+      },
+    });
+    return () => {
+      removeShortcut("new-project");
+    };
+  }, []);
 
   const searchOptions = [
     {
@@ -114,6 +133,7 @@ const ProjectsClient = () => {
       }}
       text={{
         topLeft: "Projects",
+        bottomLeft: "/projects",
       }}
     >
       <div className="flex items-center justify-between">

@@ -63,6 +63,7 @@ const NewProjectClient = () => {
       }}
       text={{
         topLeft: "Create New Project",
+        bottomLeft: "/projects/new",
       }}
     >
       <form action={handleSubmit} className="w-full space-y-6 md:max-w-lg">

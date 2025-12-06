@@ -98,7 +98,14 @@ export function ShortcutsProvider({
         target.isContentEditable;
 
       if (isInputFocused) return;
-
+      console.log(
+        "event",
+        event.key,
+        event.ctrlKey,
+        event.shiftKey,
+        event.altKey,
+        event.metaKey,
+      );
       const currentShortcuts = shortcutsRef.current;
       for (const shortcut of currentShortcuts) {
         if (shortcut.escKey && event.key !== "Escape") continue;
@@ -114,6 +121,7 @@ export function ShortcutsProvider({
           (letter) => event.key.toLowerCase() === letter.toLowerCase(),
         );
         if (!lettersMatch) continue;
+        console.log("shortcut", shortcut);
         event.preventDefault();
         shortcut.action(event);
         break;
