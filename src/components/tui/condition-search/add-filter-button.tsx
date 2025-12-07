@@ -193,6 +193,11 @@ export const AddFilterButton = ({
             <>
               <CommandInput
                 placeholder="Search categories..."
+                box={{
+                  style: {
+                    background: "bg-transparent",
+                  },
+                }}
                 defaultValue={valueSearchQuery}
                 onChange={(e) => onValueSearchQueryChange(e.target.value)}
               />

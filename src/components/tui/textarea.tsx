@@ -9,7 +9,15 @@ function Textarea({
   ...props
 }: { box?: BoxProps } & React.ComponentProps<"textarea">) {
   return (
-    <Box {...box}>
+    <Box
+      {...{
+        ...box,
+        style: {
+          content: cn("p-0", box?.style?.content),
+          box: cn("has-[textarea:focus]:text-primary", box?.style?.box),
+        },
+      }}
+    >
       <textarea
         data-slot="textarea"
         className={cn(

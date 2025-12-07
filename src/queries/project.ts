@@ -16,11 +16,11 @@ export const useSearchProjectsQuery = (
     queryFn: async () => {
       const { data, error } = await searchProjectsAction({
         queries: queries
-          .filter((query) => valueIsValid(query.operator, query.value))
           .map((query) => ({
             ...query,
             value: query.value ? JSON.stringify(query.value) : "",
-          })),
+          }))
+          .filter((query) => valueIsValid(query.operator, query.value)),
         textQuery,
       });
       if (error) {

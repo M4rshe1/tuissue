@@ -10,6 +10,7 @@ import { actionAuth, actionOptionalAuth } from "@/lib/hoc-actions";
 import { GLOBAL_SETTINGS } from "@/lib/settings/global";
 import { getSettings } from "@/lib/settings/utils";
 import { db } from "@/server/db";
+import { Prisma } from "generated/prisma/client";
 import z from "zod";
 
 const searchProjectsSchema = z.object({
@@ -49,15 +50,20 @@ export const searchProjectsAction = await actionOptionalAuth(
       ...prismaQueries,
       ...(textQuery !== ""
         ? {
-            name: { contains: textQuery, mode: "insensitive" },
-            description: { contains: textQuery, mode: "insensitive" },
+            name: { contains: textQuery, mode: Prisma.QueryMode.insensitive },
+            description: {
+              contains: textQuery,
+              mode: Prisma.QueryMode.insensitive,
+            },
           }
         : {}),
     };
+    console.log("prismaQueries", prismaQueries);
 
     const projects = await db.project.findMany({
       where: {
         ...prismaQueries,
+        name: { contains: textQuery, mode: Prisma.QueryMode.insensitive },
         OR: [
           { visibility: PROJECT_VISIBILITY.PUBLIC },
           {

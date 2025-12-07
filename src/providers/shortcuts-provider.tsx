@@ -121,7 +121,6 @@ export function ShortcutsProvider({
           (letter) => event.key.toLowerCase() === letter.toLowerCase(),
         );
         if (!lettersMatch) continue;
-        console.log("shortcut", shortcut);
         event.preventDefault();
         shortcut.action(event);
         break;

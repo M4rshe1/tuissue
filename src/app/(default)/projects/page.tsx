@@ -1,10 +1,11 @@
-import { withAuth } from "@/lib/hoc-pages";
 import ProjectsClient from "./client";
 import { getQueryClient } from "@/lib/get-query-client";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { searchProjectsAction } from "@/actions/project";
+import { withOptionalAuth } from "@/lib/hoc-pages";
+import type { Session } from "@/server/better-auth/config";
 
-const Page = async () => {
+const Page = async ({ session }: { session: Session | null }) => {
   const queryClient = getQueryClient();
   await queryClient.prefetchQuery({
     queryKey: ["search-projects", [], ""],
@@ -17,4 +18,4 @@ const Page = async () => {
   );
 };
 
-export default withAuth(Page);
+export default withOptionalAuth(Page);
