@@ -69,7 +69,7 @@ function CommandList({
     <CommandPrimitive.List
       data-slot="command-list"
       className={cn(
-        "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto px-2",
+        "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto",
         className,
       )}
       {...props}
@@ -119,7 +119,7 @@ function CommandItem({
       data-slot="command-item-wrapper"
       className={cn(
         className,
-        "data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground flex h-6 cursor-pointer items-center px-2 text-sm",
+        "data-[selected=true]:bg-muted data-[selected=true]:text-foreground flex h-6 cursor-pointer items-center px-2 text-sm",
       )}
       {...props}
     />

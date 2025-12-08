@@ -8,12 +8,13 @@ import {
   CommandDialog,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/tui/command";
 import { Button } from "./ui/button";
 import { useSearchIssuesQuery } from "@/queries/issue";
 import { Box } from "./tui/box";
+import { Input } from "./tui/input";
 
 export function Search({
   open,
@@ -70,8 +71,8 @@ export function Search({
         box={{
           text: {
             topLeft: (
-              <div className="flex items-center gap-2">
-                <SearchIcon className="size-4 shrink-0 opacity-50" />
+              <div className="flex items-center gap-1">
+                <SearchIcon className="size-4 shrink-0" />
                 <span>Search</span>
               </div>
             ),
@@ -88,55 +89,54 @@ export function Search({
           }
         }}
       >
-        <CommandInput
-          placeholder="Search"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        {isLoading && (
-          <Box>
-            <div className="text-muted-foreground py-6 text-center text-sm">
-              Searching...
-            </div>
-          </Box>
-        )}
-        {!isLoading &&
-          issues.length === 0 &&
-          projects.length === 0 &&
-          searchQuery && <CommandEmpty>No results found.</CommandEmpty>}
-        {!isLoading && projects.length > 0 && (
-          <CommandGroup text={{ topLeft: "Options" }}>
-            {projects.map((project) => (
-              <CommandItem
-                key={project.id}
-                onSelect={() => handleSelectProject(project.id)}
-              >
-                <Folder className="size-4" />
-                <span>{project.name}</span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        )}
-        {!isLoading && issues.length > 0 && (
-          <CommandGroup text={{ topLeft: "Issues" }}>
-            {issues.map((issue) => (
-              <CommandItem
-                key={issue.id}
-                onSelect={() => handleSelectIssue(issue.id, issue.projectId)}
-              >
-                <Hash className="size-4" />
-                <span>
-                  {issue.project?.name && (
-                    <span className="text-muted-foreground">
-                      {issue.project.name} #
-                    </span>
-                  )}
-                  {issue.number}: {issue.title}
-                </span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        )}
+        <div className="h-fit">
+          <Input
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full"
+          />
+        </div>
+        <CommandList>
+          {isLoading && (
+            <Box>
+              <div className="text-muted-foreground py-6 text-center text-sm">
+                Searching...
+              </div>
+            </Box>
+          )}
+          {!isLoading &&
+            issues.length === 0 &&
+            projects.length === 0 &&
+            searchQuery && <CommandEmpty>No results found.</CommandEmpty>}
+          {!isLoading && (projects.length > 0 || issues.length > 0) && (
+            <CommandGroup text={{ topLeft: "Results" }}>
+              {projects.map((project) => (
+                <CommandItem
+                  key={`project-${project.id}`}
+                  className="flex items-center gap-1"
+                  onSelect={() => handleSelectProject(project.id)}
+                >
+                  <Folder className="size-4" />
+                  <span className="truncate text-sm">{project.name}</span>
+                </CommandItem>
+              ))}
+              {issues.map((issue) => (
+                <CommandItem
+                  key={`issue-${issue.id}`}
+                  className="flex items-center gap-1"
+                  onSelect={() => handleSelectIssue(issue.id, issue.projectId)}
+                >
+                  <Hash className="size-4" />
+                  <span className="truncate text-sm">
+                    {issue.project?.name && <>{issue.project.name} #</>}
+                    {issue.number}: {issue.title}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+        </CommandList>
         {!hideTips && (
           <Box
             text={{ topLeft: "Tips" }}

@@ -17,8 +17,6 @@ import {
 import { PROJECT_VISIBILITY } from "@/lib/enums";
 import { H1 } from "@/components/tui/heading";
 
-
-
 const NewProjectClient = () => {
   const router = useRouter();
   const { mutateAsync: createProject, isPending } = useCreateProjectMutation();
@@ -74,6 +72,10 @@ const NewProjectClient = () => {
     >
       <div className="flex w-full max-w-lg flex-col gap-2">
         <H1>Create New Project</H1>
+        <p className="text-muted-foreground text-sm">
+          A project is a place to collect issues and track their progress for a
+          specific Produkt, Service or Project.
+        </p>
         <form action={handleSubmit} className="w-full space-y-2 md:max-w-lg">
           {/* Project Name */}
           <div className="space-y-2">
