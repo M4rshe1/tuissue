@@ -547,7 +547,7 @@ const CHAR_PATTERNS_SIZES = {
 export const AsciiChar = ({
   value,
   className = "",
-  size = "lg",
+  size = "default",
 }: {
   value: string | number;
   className?: string;
