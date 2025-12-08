@@ -65,3 +65,13 @@ export const PERMISSIONS = {
     },
   },
 };
+
+export const getPermission = (
+  permission: keyof typeof PERMISSIONS,
+  action: keyof (typeof PERMISSIONS)[typeof permission],
+  role: string,
+) => {
+  return PERMISSIONS[permission][
+    action as keyof (typeof PERMISSIONS)[typeof permission]
+  ][role as keyof (typeof PERMISSIONS)[typeof permission][typeof action]];
+};

@@ -114,6 +114,98 @@ export const searchProjectsAction = await actionOptionalAuth(
   },
 );
 
+const getProjectSchema = z.object({
+  projectId: z.string(),
+});
+
+export const getProjectAction = await actionOptionalAuth(
+  getProjectSchema,
+  async ({ data, session }) => {
+    const { projectId } = data;
+    const project = await db.project.findUnique({
+      where: {
+        id: projectId,
+        OR: [
+          { visibility: PROJECT_VISIBILITY.PUBLIC },
+          {
+            visibility: session?.user
+              ? PROJECT_VISIBILITY.SEMI_PUBLIC
+              : "NOT_ALLOWED",
+          },
+          { visibility: PROJECT_VISIBILITY.SEMI_PROTECTED },
+          {
+            visibility: session?.user
+              ? PROJECT_VISIBILITY.PROTECTED
+              : "NOT_ALLOWED",
+          },
+          {
+            visibility: PROJECT_VISIBILITY.PRIVATE,
+            userProjects: {
+              some: {
+                userId: session?.user?.id ?? "",
+              },
+            },
+          },
+          {
+            visibility:
+              session?.user?.role === "admin"
+                ? {
+                    in: [
+                      PROJECT_VISIBILITY.SEMI_PROTECTED,
+                      PROJECT_VISIBILITY.PROTECTED,
+                      PROJECT_VISIBILITY.PRIVATE,
+                    ],
+                  }
+                : "NOT_ALLOWED",
+          },
+        ],
+      },
+      include: {
+        userProjects: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            issues: true,
+            customFields: true,
+          },
+        },
+        issues: {
+          take: 5,
+          orderBy: {
+            createdAt: "desc",
+          },
+          select: {
+            id: true,
+            number: true,
+            title: true,
+            summary: true,
+            createdAt: true,
+            updatedAt: true,
+            creator: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return project;
+  },
+);
+
 const createProjectSchema = z.object({
   name: z.string(),
   description: z.string(),

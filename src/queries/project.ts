@@ -1,5 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createProjectAction, searchProjectsAction } from "@/actions/project";
+import {
+  createProjectAction,
+  getProjectAction,
+  searchProjectsAction,
+} from "@/actions/project";
 import { toast } from "@/components/tui/toaster";
 import { z } from "zod";
 import type { StructuredQuery } from "@/components/tui/condition-search/types";
@@ -58,5 +62,24 @@ export const useCreateProjectMutation = () => {
     onSuccess: () => {
       revalidateAny("projects");
     },
+  });
+};
+
+export const useGetProjectQuery = (projectId: string) => {
+  return useQuery({
+    queryKey: ["project", projectId],
+    queryFn: async () => {
+      const { data, error } = await getProjectAction({ projectId });
+      if (error) {
+        toast({
+          variant: "error",
+          title: error.message,
+          description: error.details,
+        });
+        return null;
+      }
+      return data;
+    },
+    enabled: !!projectId,
   });
 };

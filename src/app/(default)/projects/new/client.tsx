@@ -17,11 +17,13 @@ import {
 import { PROJECT_VISIBILITY } from "@/lib/enums";
 import { H1 } from "@/components/tui/heading";
 
+
+
 const NewProjectClient = () => {
   const router = useRouter();
   const { mutateAsync: createProject, isPending } = useCreateProjectMutation();
 
-  const handleSubmit = (formData: FormData) => {
+  const handleSubmit = async (formData: FormData) => {
     if (!formData.get("name")?.toString().trim()) {
       toast({
         title: "Validation Error",
@@ -31,7 +33,7 @@ const NewProjectClient = () => {
       return;
     }
 
-    createProject({
+    const result = await createProject({
       name: formData.get("name")?.toString().trim() ?? "",
       description: formData.get("description")?.toString().trim() ?? "",
       visibility: formData
@@ -42,13 +44,17 @@ const NewProjectClient = () => {
         formData.get("inheritCustomFields")?.toString().trim() === "true",
     });
 
+    if (!result) {
+      return;
+    }
+
     toast({
       title: "Success",
       description: `Project "${formData.get("name")?.toString().trim()}" created successfully`,
       variant: "success",
     });
 
-    router.push("/projects");
+    router.push(`/projects/${result.id}`);
   };
 
   const handleCancel = () => {
@@ -136,7 +142,9 @@ const NewProjectClient = () => {
             <Button type="button" variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button type="submit">Create Project</Button>
+            <Button type="submit" disabled={isPending}>
+              Create Project
+            </Button>
           </div>
         </form>
       </div>

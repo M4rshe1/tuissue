@@ -5,12 +5,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TableHead } from "@/components/ui/table";
-import { Box } from "../box";
+import { Box, type BoxProps } from "../box";
 import type { tableProps } from "./types";
 import { useState, useMemo, useEffect } from "react";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const Table = <T,>({ data, columns }: tableProps<T>) => {
+const Table = <T,>({
+  data,
+  columns,
+  box,
+}: tableProps<T> & { box?: BoxProps }) => {
   const [sortConfig, setSortConfig] = useState<
     {
       key: string;
@@ -130,19 +135,36 @@ const Table = <T,>({ data, columns }: tableProps<T>) => {
   }, [sortConfig]);
 
   return (
-    <Box style={{ content: "p-0", background: "bg-background" }}>
+    <Box
+      {...{
+        ...box,
+        style: {
+          content: cn("p-0", box?.style?.content),
+          background: cn("bg-background", box?.style?.background),
+        },
+      }}
+    >
       <table className="w-full">
         <TableHeader className="border-none">
           <TableRow>
-            {columns.map((column) => (
+            {columns.map((column, idx) => (
               <TableHead
-                onClick={() => handleSort(column.key)}
-                className="cursor-pointer p-1 text-sm"
-                key={column.key}
+                {...(column.key !== "actions" && {
+                  onClick: () => handleSort(column.key as string),
+                })}
+                className="cursor-pointer p-1 text-sm font-bold"
+                key={idx}
               >
                 <div className="hover:text-foreground flex items-center transition-colors">
-                  {column.label}
-                  {getSortIcon(column.key)}
+                  {column.header ? (
+                    column.header(getSortIcon(column.key as string))
+                  ) : (
+                    <>
+                      {column.label}
+                      {column.key !== "actions" &&
+                        getSortIcon(column.key as string)}
+                    </>
+                  )}
                 </div>
               </TableHead>
             ))}
@@ -153,7 +175,7 @@ const Table = <T,>({ data, columns }: tableProps<T>) => {
             sortedData?.map((row, index) => (
               <TableRow className="border-none" key={index}>
                 {columns.map((column) => (
-                  <TableCell className="p-1" key={column.key}>
+                  <TableCell className="p-1" key={column.key as string}>
                     {column.cell?.(row)}
                   </TableCell>
                 ))}

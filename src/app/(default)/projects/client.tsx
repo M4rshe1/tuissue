@@ -20,6 +20,8 @@ import { Box } from "@/components/tui/box";
 import Link from "next/link";
 import { useShortcuts } from "@/providers/shortcuts-provider";
 import { useRouter } from "next/navigation";
+import { formatRelativeTime } from "@/lib/utils";
+import { formatDate } from "date-fns";
 
 type Project = DbProject & {
   userProjects: DbUserProject[];
@@ -111,12 +113,24 @@ const ProjectsClient = () => {
     {
       label: "Created At",
       key: "createdAt",
-      cell: (row) => new Date(row.createdAt).toISOString(),
+      cell: (row) => (
+        <span
+          title={formatDate(new Date(row.createdAt), "MMM d, yyyy @ HH:mm:ss")}
+        >
+          {formatRelativeTime(row.createdAt)}
+        </span>
+      ),
     },
     {
       label: "Updated At",
       key: "updatedAt",
-      cell: (row) => new Date(row.updatedAt).toISOString(),
+      cell: (row) => (
+        <span
+          title={formatDate(new Date(row.updatedAt), "MMM d, yyyy @ HH:mm:ss")}
+        >
+          {formatRelativeTime(row.updatedAt)}
+        </span>
+      ),
     },
   ];
 

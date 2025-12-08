@@ -1,10 +1,21 @@
-type colDef<T> = {
+type colDefBase<T> = {
   label: string;
-  key: string;
-  cell?: (row: T) => React.ReactNode;
-  header?: (row: T) => React.ReactNode;
-  footer?: (row: T) => React.ReactNode;
+  header?: (icon: React.ReactNode) => React.ReactNode;
+  footer?: () => React.ReactNode;
 };
+
+type valueColDef<T> = colDefBase<T> & {
+  key: keyof T;
+  cell?: (row: T) => React.ReactNode;
+};
+
+type actionDef<T> = colDefBase<T> & {
+  key: "actions";
+  cell?: (row: T) => React.ReactNode;
+  inline?: boolean;
+};
+
+type colDef<T> = valueColDef<T> | actionDef<T>;
 
 type tableProps<T> = {
   data: T[];
