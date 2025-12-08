@@ -208,7 +208,7 @@ const Client = ({ projectId }: { projectId: string }) => {
       }}
     >
       <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
+        <div className="flex-1 p-4">
           <AsciiChar value={project.name} className="text-primary" />
           {project.description && (
             <p className="text-muted-foreground mt-2 text-sm">
