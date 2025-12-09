@@ -153,13 +153,6 @@ const recentIssuesTableColumns: colDef<Issue>[] = [
 const Client = ({ projectId }: { projectId: string }) => {
   const { data: project, isPending } = useGetProjectQuery(projectId);
   const { data: session } = authClient.useSession();
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
 
   const role = useMemo(() => {
     return (
@@ -195,6 +188,11 @@ const Client = ({ projectId }: { projectId: string }) => {
     return <ProjectOverviewSkeleton projectId={projectId} />;
   }
 
+  const createdAt = formatDate(project.createdAt, "MMM d, yyyy @ HH:mm");
+  const updatedAt = formatDate(project.updatedAt, "MMM d, yyyy @ HH:mm");
+  const isUpdated = updatedAt !== createdAt;
+  const updatedAtText = isUpdated ? ` · Updated ${updatedAt}` : "";
+
   return (
     <Box
       style={{
@@ -204,7 +202,7 @@ const Client = ({ projectId }: { projectId: string }) => {
       text={{
         topLeft: project.name,
         bottomLeft: `/projects/[${project.name}]`,
-        bottomRight: `Created ${formatDate(project.createdAt)} · Updated ${formatDate(project.updatedAt)}`,
+        bottomRight: `Created ${createdAt}${updatedAtText}`,
       }}
     >
       <div className="flex items-start justify-between gap-4">
