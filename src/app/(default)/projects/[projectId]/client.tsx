@@ -4,7 +4,7 @@ import { Box } from "@/components/tui/box";
 import { Button } from "@/components/ui/button";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { useGetProjectQuery } from "@/queries/project";
-import { Eye, FileText, Plus, Loader2 } from "lucide-react";
+import { Eye, FileText, Plus, Loader2, Settings2 } from "lucide-react";
 import Link from "next/link";
 import type { colDef } from "@/components/tui/table/types";
 import Table from "@/components/tui/table";
@@ -215,23 +215,15 @@ const Client = ({ projectId }: { projectId: string }) => {
           )}
         </div>
         <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/projects/${project.id}/issue`}>
-              <FileText className="size-4" />
-              Issues
-            </Link>
-          </Button>
-          <Button
-            asChild
-            className="group flex items-center gap-0 transition-all duration-300 hover:gap-2"
-          >
-            <Link href={`/projects/${project.id}/issue/new`}>
-              <Plus className="size-4" />
-              <span className="max-w-0 overflow-hidden whitespace-nowrap transition-all duration-300 group-hover:max-w-xs">
-                New Issue
-              </span>
-            </Link>
-          </Button>
+          {getPermission("PROJECT", "EDIT", role) ? (
+            <Button
+              asChild
+              className="group flex h-8 items-center"
+              variant="outline"
+            >
+              <Link href={`/projects/${project.id}/settings`}>Edit</Link>
+            </Button>
+          ) : null}
         </div>
       </div>
 

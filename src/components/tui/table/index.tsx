@@ -146,13 +146,13 @@ const Table = <T,>({
     >
       <table className="w-full">
         <TableHeader className="border-none">
-          <TableRow>
+          <TableRow className="hover:bg-transparent">
             {columns.map((column, idx) => (
               <TableHead
                 {...(column.key !== "actions" && {
                   onClick: () => handleSort(column.key as string),
                 })}
-                className="cursor-pointer p-1 text-sm font-bold"
+                className="hover:text-foreground hover:bg-muted/50 cursor-pointer p-1 text-sm font-bold hover:underline"
                 key={idx}
               >
                 <div className="hover:text-foreground flex items-center transition-colors">
