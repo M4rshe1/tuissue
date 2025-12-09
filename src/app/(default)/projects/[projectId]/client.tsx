@@ -281,14 +281,14 @@ const Client = ({ projectId }: { projectId: string }) => {
         <Box
           text={{
             topLeft: <span className="text-foreground">Custom Fields</span>,
-            bottomRight: (
+            bottomRight: getPermission("CUSTOM_FIELD", "EDIT", role) ? (
               <Link
                 href={`/projects/${project.id}/custom-fields`}
                 className="text-muted-foreground hover:text-foreground justify-left flex w-full cursor-pointer items-center hover:underline"
               >
-                View All
+                Manage
               </Link>
-            ),
+            ) : null,
           }}
           style={{
             content: "flex flex-col items-center justify-center gap-2",
@@ -338,6 +338,14 @@ const Client = ({ projectId }: { projectId: string }) => {
               text: {
                 topLeft: (
                   <span className="text-foreground text-sm">Recent Issues</span>
+                ),
+                bottomRight: (
+                  <Link
+                    href={`/projects/${project.id}/issue`}
+                    className="text-muted-foreground hover:text-foreground justify-left flex w-full cursor-pointer items-center hover:underline"
+                  >
+                    View All
+                  </Link>
                 ),
               },
               style: {

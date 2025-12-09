@@ -98,6 +98,7 @@ model Project {
   name                String
   description         String?
   image               String?
+  url                 String?
   inheritCustomFields Boolean @default(false)
   visibility          String  @default("PUBLIC") // PUBLIC, SEMI_PUBLIC, PRIVATE, PROTECTED
 
