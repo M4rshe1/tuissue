@@ -35,20 +35,12 @@ const customFieldsTableColumns: colDef<CustomField>[] = [
   {
     label: "Created At",
     key: "createdAt",
-    cell: (row) => (
-      <span className="text-foreground">
-        {format(row.createdAt, "dd/MM/yyyy HH:mm")}
-      </span>
-    ),
+    cell: (row) => format(row.createdAt, "dd/MM/yyyy HH:mm"),
   },
   {
     label: "Updated At",
     key: "updatedAt",
-    cell: (row) => (
-      <span className="text-foreground">
-        {format(row.updatedAt, "dd/MM/yyyy HH:mm")}
-      </span>
-    ),
+    cell: (row) => format(row.updatedAt, "dd/MM/yyyy HH:mm"),
   },
 ];
 
