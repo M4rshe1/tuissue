@@ -5,7 +5,15 @@ import type { colDef } from "@/components/tui/table/types";
 import { useGetCustomFieldsQuery } from "@/queries/custom-field";
 import { useGetProjectQuery } from "@/queries/project";
 import { format } from "date-fns";
-import type { CustomField } from "generated/prisma/client";
+import type {
+  CustomField as CustomFieldDb,
+  CustomFieldDependency,
+} from "generated/prisma/client";
+
+type CustomField = CustomFieldDb & {
+  customFieldDependencies: CustomFieldDependency[];
+  customFieldsDepending: CustomFieldDependency[];
+};
 
 const customFieldsTableColumns: colDef<CustomField>[] = [
   {
@@ -31,6 +39,25 @@ const customFieldsTableColumns: colDef<CustomField>[] = [
   {
     label: "Dependency Operator",
     key: "dependencyOperator",
+  },
+  {
+    label: "Order",
+    key: "order",
+  },
+  {
+    label: "Is Obsolete",
+    key: "isObsolete",
+    cell: (row) => (row.isObsolete ? "Yes" : "No"),
+  },
+  {
+    label: "dependencies",
+    key: "customFieldDependencies",
+    cell: (row) => row.customFieldDependencies.length || "-",
+  },
+  {
+    label: "Depending",
+    key: "customFieldsDepending",
+    cell: (row) => row.customFieldsDepending.length || "-",
   },
   {
     label: "Created At",
