@@ -1,3 +1,5 @@
+"use client";
+
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   createProjectAction,
@@ -5,7 +7,6 @@ import {
   searchProjectsAction,
 } from "@/actions/project";
 import { toast } from "@/components/tui/toaster";
-import { z } from "zod";
 import type { StructuredQuery } from "@/components/tui/condition-search/types";
 import { revalidateAny } from "@/lib/get-query-client";
 import { PROJECT_VISIBILITY } from "@/lib/enums";

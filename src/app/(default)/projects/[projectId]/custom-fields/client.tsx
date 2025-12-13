@@ -1,3 +1,5 @@
+"use client";
+
 import { Box } from "@/components/tui/box";
 import { H1 } from "@/components/tui/heading";
 import Table from "@/components/tui/table";
@@ -82,6 +84,9 @@ export default function Client({ projectId }: { projectId: string }) {
       text={{
         topLeft: <span className="text-foreground">Custom Fields</span>,
         bottomLeft: `/projects/${project.name ?? projectId}/custom-fields`,
+      }}
+      style={{
+        content: "flex flex-col gap-4",
       }}
     >
       <H1>Custom Fields</H1>

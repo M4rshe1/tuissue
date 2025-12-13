@@ -1,3 +1,5 @@
+"use server";
+
 import { PROJECT_VISIBILITY, USER_PROJECT_ROLE } from "@/lib/enums";
 import { actionOptionalAuth } from "@/lib/hoc-actions";
 import { db } from "@/server/db";
