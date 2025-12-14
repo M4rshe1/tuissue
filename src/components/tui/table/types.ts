@@ -20,6 +20,7 @@ type colDef<T> = valueColDef<T> | actionDef<T>;
 type tableProps<T> = {
   data: T[];
   columns: colDef<T>[];
+  onRowClick?: (row: T) => void;
 };
 
 export type { colDef, tableProps };

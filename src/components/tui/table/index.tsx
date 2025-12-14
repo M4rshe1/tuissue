@@ -15,6 +15,7 @@ const Table = <T,>({
   data,
   columns,
   box,
+  onRowClick,
 }: tableProps<T> & { box?: BoxProps }) => {
   const [sortConfig, setSortConfig] = useState<
     {
@@ -173,10 +174,19 @@ const Table = <T,>({
         <TableBody className="text-sm">
           {sortedData?.length > 0 ? (
             sortedData?.map((row, index) => (
-              <TableRow className="border-none" key={index}>
+              <TableRow
+                className={cn({
+                  "hover:bg-muted/50 cursor-pointer border-none": !!onRowClick,
+                })}
+                key={index}
+                onClick={() => onRowClick?.(row)}
+              >
                 {columns.map((column) => (
                   <TableCell className="p-1" key={column.key as string}>
-                    {column.cell?.(row)}
+                    {column.cell?.(row) ??
+                      (row[
+                        column.key as keyof T
+                      ] as unknown as React.ReactNode)}
                   </TableCell>
                 ))}
               </TableRow>
