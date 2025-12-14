@@ -4,16 +4,23 @@ import { Box } from "@/components/tui/box";
 import { H1 } from "@/components/tui/heading";
 import Table from "@/components/tui/table";
 import type { colDef } from "@/components/tui/table/types";
+import { Button } from "@/components/ui/button";
+import { getPermission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { useShortcuts } from "@/providers/shortcuts-provider";
-import { useGetCustomFieldsQuery } from "@/queries/custom-field";
+import {
+  useDeleteProjectCustomFieldMutation,
+  useGetProjectCustomFieldsQuery,
+} from "@/queries/custom-field";
 import { useGetProjectQuery } from "@/queries/project";
+import { authClient } from "@/server/better-auth/client";
 import { format } from "date-fns";
 import type {
   CustomField as CustomFieldDb,
   CustomFieldDependency,
 } from "generated/prisma/client";
-import { useEffect, useState } from "react";
+import { Link } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 type CustomField = CustomFieldDb & {
   customFieldDependencies: CustomFieldDependency[];
@@ -67,8 +74,11 @@ const customFieldsTableColumns: colDef<CustomField>[] = [
 ];
 
 export default function Client({ projectId }: { projectId: string }) {
-  const { data: customFields } = useGetCustomFieldsQuery(projectId);
+  const { data: customFields } = useGetProjectCustomFieldsQuery(projectId);
   const { data: project } = useGetProjectQuery(projectId);
+  const { data: session } = authClient.useSession();
+  const { mutate: deleteCustomField } =
+    useDeleteProjectCustomFieldMutation(projectId);
   const [selectedCustomField, setSelectedCustomField] =
     useState<CustomField | null>(null);
   const { addShortcut, removeShortcut } = useShortcuts();
@@ -92,6 +102,16 @@ export default function Client({ projectId }: { projectId: string }) {
   if (!customFields || !project) {
     return <div>Loading...</div>;
   }
+  const role = useMemo(() => {
+    if (!session?.user?.id) {
+      return "";
+    }
+    return (
+      project?.userProjects.find(
+        (userProject) => userProject.userId === session?.user?.id,
+      )?.role ?? ""
+    );
+  }, [project, session?.user?.id]);
 
   return (
     <Box
@@ -104,11 +124,20 @@ export default function Client({ projectId }: { projectId: string }) {
       }}
       className={`transition-all duration-300 ${selectedCustomField ? "w-2/3" : "w-full"}`}
     >
-      <div className="mt-2 ml-2 flex flex-col">
-        <H1>Custom Fields</H1>
-        <p className="text-muted-foreground text-sm">
-          Custom fields are used to add additional information to issues.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="mt-2 ml-2 flex flex-col">
+          <H1>Custom Fields</H1>
+          <p className="text-muted-foreground text-sm">
+            Custom fields are used to add additional information to issues.
+          </p>
+        </div>
+        <div className="flex gap-2 p-2">
+          {getPermission("CUSTOM_FIELD", "CREATE", role) ? (
+            <Button className="group flex h-8 items-center" variant="outline">
+              Add
+            </Button>
+          ) : null}
+        </div>
       </div>
       <div className={cn("flex h-full flex-row transition-all duration-300")}>
         <Table
@@ -129,7 +158,26 @@ export default function Client({ projectId }: { projectId: string }) {
             box: `overflow-hidden transition-all duration-300 ${selectedCustomField ? "w-1/3" : "invisible w-0 m-0 px-0"}`,
           }}
         >
-          {selectedCustomField && <div>d</div>}
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-end gap-2">
+              {getPermission("CUSTOM_FIELD", "DELETE", role) ? (
+                <Button
+                  variant="outlineError"
+                  onClick={() => {
+                    deleteCustomField({
+                      customFieldId: selectedCustomField?.id ?? "",
+                    });
+                    setSelectedCustomField(null);
+                  }}
+                >
+                  Delete
+                </Button>
+              ) : null}
+              {getPermission("CUSTOM_FIELD", "EDIT", role) ? (
+                <Button variant="outline">Save</Button>
+              ) : null}
+            </div>
+          </div>
         </Box>
       </div>
     </Box>

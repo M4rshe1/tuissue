@@ -1,4 +1,4 @@
-import { getCustomFieldsAction } from "@/actions/custom-field";
+import { getProjectCustomFieldsAction } from "@/actions/custom-field";
 import { getProjectAction } from "@/actions/project";
 import { getQueryClient } from "@/lib/get-query-client";
 import { withOptionalAuth } from "@/lib/hoc-pages";
@@ -24,7 +24,7 @@ const Page = async ({ params }: { params: { projectId: string } }) => {
     queryClient.prefetchQuery({
       queryKey: ["custom-fields", params.projectId],
       queryFn: async () => {
-        const { data, error } = await getCustomFieldsAction({
+        const { data, error } = await getProjectCustomFieldsAction({
           projectId: params.projectId,
         });
         if (error) {

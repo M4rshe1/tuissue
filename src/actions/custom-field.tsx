@@ -1,11 +1,12 @@
 "use server";
 
-import { PROJECT_VISIBILITY, USER_PROJECT_ROLE } from "@/lib/enums";
+import { PROJECT_VISIBILITY } from "@/lib/enums";
 import { actionOptionalAuth } from "@/lib/hoc-actions";
+import { getPermission } from "@/lib/permissions";
 import { db } from "@/server/db";
 import z from "zod";
 
-export const getCustomFieldsAction = await actionOptionalAuth(
+export const getProjectCustomFieldsAction = await actionOptionalAuth(
   z.object({
     projectId: z.string(),
   }),
@@ -61,7 +62,7 @@ export const getCustomFieldsAction = await actionOptionalAuth(
   },
 );
 
-export const createCustomFieldAction = await actionOptionalAuth(
+export const createProjectCustomFieldAction = await actionOptionalAuth(
   z.object({
     projectId: z.string(),
     label: z.string(),
@@ -84,15 +85,19 @@ export const createCustomFieldAction = await actionOptionalAuth(
       dependencyOperator,
     } = data;
 
-    const permission = await db.userProject.findFirst({
+    const userProject = await db.userProject.findFirst({
       where: {
         userId: session?.user?.id ?? "",
         projectId: projectId,
-        role: {
-          in: [USER_PROJECT_ROLE.OWNER, USER_PROJECT_ROLE.ADMIN],
-        },
       },
     });
+
+    const permission = getPermission(
+      "CUSTOM_FIELD",
+      "CREATE",
+      userProject?.role as any,
+    );
+
     if (!permission) {
       throw new Error("Unauthorized");
     }
@@ -113,7 +118,7 @@ export const createCustomFieldAction = await actionOptionalAuth(
   },
 );
 
-export const createCustomFieldOptionAction = await actionOptionalAuth(
+export const createProjectCustomFieldOptionAction = await actionOptionalAuth(
   z.object({
     customFieldId: z.string(),
     value: z.string(),
@@ -121,5 +126,36 @@ export const createCustomFieldOptionAction = await actionOptionalAuth(
   }),
   async ({ data, session }) => {
     const { customFieldId, value, color } = data;
+  },
+);
+
+export const deleteProjectCustomFieldAction = await actionOptionalAuth(
+  z.object({
+    customFieldId: z.string(),
+    projectId: z.string(),
+  }),
+  async ({ data, session }) => {
+    const { customFieldId, projectId } = data;
+    const userProject = await db.userProject.findFirst({
+      where: {
+        userId: session?.user?.id ?? "",
+        projectId: projectId,
+      },
+    });
+    const permission = getPermission(
+      "CUSTOM_FIELD",
+      "DELETE",
+      userProject?.role as any,
+    );
+    if (!permission) {
+      throw new Error("Unauthorized");
+    }
+    const customField = await db.customField.delete({
+      where: {
+        id: customFieldId,
+        projectId: projectId,
+      },
+    });
+    return { success: true };
   },
 );

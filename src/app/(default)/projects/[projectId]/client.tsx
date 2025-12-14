@@ -212,7 +212,7 @@ const Client = ({ projectId }: { projectId: string }) => {
             </p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 p-2">
           {getPermission("PROJECT", "EDIT", role) ? (
             <Button
               asChild

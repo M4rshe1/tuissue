@@ -18,6 +18,14 @@ export const PERMISSIONS = {
     },
   },
   ISSUE: {
+    CREATE: {
+      OWNER: true,
+      ADMIN: true,
+      QA: true,
+      CONTRIBUTOR: true,
+      VIEWER: false,
+      REPORTER: true,
+    },
     DELETE: {
       _CREATOR: true,
       OWNER: true,
@@ -47,6 +55,14 @@ export const PERMISSIONS = {
     },
   },
   CUSTOM_FIELD: {
+    CREATE: {
+      OWNER: true,
+      ADMIN: true,
+      QA: false,
+      CONTRIBUTOR: false,
+      VIEWER: false,
+      REPORTER: false,
+    },
     DELETE: {
       OWNER: true,
       ADMIN: true,
@@ -64,14 +80,41 @@ export const PERMISSIONS = {
       REPORTER: false,
     },
   },
-};
+  MEMBER: {
+    ADD: {
+      OWNER: true,
+      ADMIN: true,
+      QA: false,
+      CONTRIBUTOR: false,
+      VIEWER: false,
+      REPORTER: false,
+    },
+    REMOVE: {
+      OWNER: true,
+      ADMIN: true,
+      QA: false,
+      CONTRIBUTOR: false,
+      VIEWER: false,
+      REPORTER: false,
+    },
+  },
+} as const;
 
-export const getPermission = (
-  permission: keyof typeof PERMISSIONS,
-  action: keyof (typeof PERMISSIONS)[typeof permission],
+export const getPermission = <P extends keyof typeof PERMISSIONS>(
+  permission: P,
+  action: keyof (typeof PERMISSIONS)[P],
   role: string,
+  creator?: boolean,
 ) => {
-  return PERMISSIONS[permission][
-    action as keyof (typeof PERMISSIONS)[typeof permission]
-  ][role as keyof (typeof PERMISSIONS)[typeof permission][typeof action]];
+  const rolesObject =
+    PERMISSIONS[permission][action as keyof (typeof PERMISSIONS)[P]];
+  const rolePermission = rolesObject[role as keyof typeof rolesObject];
+  if (creator) {
+    return (
+      rolesObject?.["_CREATOR" as keyof typeof rolesObject] ||
+      false ||
+      rolePermission
+    );
+  }
+  return rolePermission;
 };
