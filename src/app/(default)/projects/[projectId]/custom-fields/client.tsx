@@ -133,7 +133,11 @@ export default function Client({ projectId }: { projectId: string }) {
         </div>
         <div className="flex gap-2 p-2">
           {getPermission("CUSTOM_FIELD", "CREATE", role) ? (
-            <Button className="group flex h-8 items-center" variant="outline">
+            <Button
+              size="sm"
+              className="group flex h-8 items-center"
+              variant="outline"
+            >
               Add
             </Button>
           ) : null}
@@ -162,6 +166,7 @@ export default function Client({ projectId }: { projectId: string }) {
             <div className="flex justify-end gap-2">
               {getPermission("CUSTOM_FIELD", "DELETE", role) ? (
                 <Button
+                  size="sm"
                   variant="outlineError"
                   onClick={() => {
                     deleteCustomField({
@@ -174,7 +179,9 @@ export default function Client({ projectId }: { projectId: string }) {
                 </Button>
               ) : null}
               {getPermission("CUSTOM_FIELD", "EDIT", role) ? (
-                <Button variant="outline">Save</Button>
+                <Button size="sm" variant="outline">
+                  Save
+                </Button>
               ) : null}
             </div>
           </div>
