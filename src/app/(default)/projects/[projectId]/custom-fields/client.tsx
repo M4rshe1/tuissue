@@ -64,16 +64,6 @@ const customFieldsTableColumns: colDef<CustomField>[] = [
     key: "customFieldsDepending",
     cell: (row) => row.customFieldsDepending.length || "-",
   },
-  {
-    label: "Created At",
-    key: "createdAt",
-    cell: (row) => format(row.createdAt, "dd/MM/yyyy HH:mm"),
-  },
-  {
-    label: "Updated At",
-    key: "updatedAt",
-    cell: (row) => format(row.updatedAt, "dd/MM/yyyy HH:mm"),
-  },
 ];
 
 export default function Client({ projectId }: { projectId: string }) {

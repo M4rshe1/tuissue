@@ -125,11 +125,9 @@ const recentIssuesTableColumns: colDef<Issue>[] = [
       return (
         <Link
           href={`issue/${row.id}`}
-          className="text-primary hover:text-foreground flex w-full cursor-pointer justify-center hover:underline"
+          className="text-muted-foreground hover:text-foreground flex w-full cursor-pointer hover:underline"
         >
-          <span className="text-muted-foreground hover:text-foreground truncate">
-            {row.title}
-          </span>
+          <span className="truncate">{row.title}</span>
         </Link>
       );
     },
@@ -228,7 +226,7 @@ const Client = ({ projectId }: { projectId: string }) => {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 grid-rows-2 gap-3 md:grid-cols-4 md:grid-rows-1">
         <Box
           text={{
             topLeft: <span className="text-foreground">Issues</span>,
@@ -291,7 +289,12 @@ const Client = ({ projectId }: { projectId: string }) => {
         </Box>
         <Box
           text={{
-            topLeft: <span className="text-foreground">Visibility</span>,
+            topLeft: (
+              <span className="text-foreground">
+                Visibility:{" "}
+                <span className="text-muted-foreground">{visibilityLabel}</span>
+              </span>
+            ),
             bottomRight: getPermission("PROJECT", "EDIT", role) ? (
               <Link
                 href={`/projects/${project.id}/settings`}

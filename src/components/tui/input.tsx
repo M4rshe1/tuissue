@@ -11,6 +11,8 @@ const Input = ({
         ...box,
         style: {
           box: cn("has-[input:focus]:text-primary", box?.style?.box),
+          background: box?.style?.background,
+          content: box?.style?.content,
         },
       }}
     >

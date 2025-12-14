@@ -717,12 +717,12 @@ export const AsciiChar = ({
 
   return (
     <div className={`flex gap-2 ${className}`}>
-      {chars.map((char) => {
+      {chars.map((char, charIdx) => {
         const charPatterns = charSizePatterns[char]?.join("").split("");
         if (!charPatterns) return null;
         return (
           <div
-            key={char}
+            key={charIdx}
             className={cn("grid", {
               "grid-cols-3 grid-rows-3": size === "sm",
               "grid-cols-3 grid-rows-5": size === "default",

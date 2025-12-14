@@ -137,7 +137,7 @@ export function Search({
             </CommandGroup>
           )}
         </CommandList>
-        {!hideTips && (
+        {!hideTips && !searchQuery && (
           <Box
             text={{ topLeft: "Tips" }}
             style={{ box: "text-warning" }}
