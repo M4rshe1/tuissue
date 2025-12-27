@@ -37,7 +37,7 @@ export const Box = ({
       {text?.topLeft && (
         <div
           className={cn(
-            "bg-background absolute top-0 left-4 px-1 text-sm font-semibold",
+            "bg-background absolute top-0 left-4 z-10 px-1 text-sm font-semibold",
             style?.background,
           )}
         >
@@ -47,7 +47,7 @@ export const Box = ({
       {text?.topRight && (
         <div
           className={cn(
-            "bg-background absolute top-0 right-4 px-1 text-sm font-semibold",
+            "bg-background absolute top-0 right-4 z-10 px-1 text-sm font-semibold",
             style?.background,
           )}
         >
@@ -57,7 +57,7 @@ export const Box = ({
       {text?.topCenter && (
         <div
           className={cn(
-            "bg-background absolute top-0 right-1/2 translate-x-1/2 px-1 text-sm font-semibold",
+            "bg-background absolute top-0 right-1/2 z-10 translate-x-1/2 px-1 text-sm font-semibold",
             style?.background,
           )}
         >
@@ -67,7 +67,7 @@ export const Box = ({
       {text?.bottomCenter && (
         <div
           className={cn(
-            "bg-background absolute right-1/2 bottom-0 translate-x-1/2 px-1 text-sm font-semibold",
+            "bg-background absolute right-1/2 bottom-0 z-10 translate-x-1/2 px-1 text-sm font-semibold",
             style?.background,
           )}
         >
@@ -77,7 +77,7 @@ export const Box = ({
       {text?.bottomLeft && (
         <div
           className={cn(
-            "bg-background absolute bottom-0 left-4 px-1 text-sm font-semibold",
+            "bg-background absolute bottom-0 left-4 z-10 px-1 text-sm font-semibold",
             style?.background,
           )}
         >
@@ -87,7 +87,7 @@ export const Box = ({
       {text?.bottomRight && (
         <div
           className={cn(
-            "bg-background absolute right-4 bottom-0 px-1 text-sm font-semibold",
+            "bg-background absolute right-4 bottom-0 z-10 px-1 text-sm font-semibold",
             style?.background,
           )}
         >
@@ -96,7 +96,7 @@ export const Box = ({
       )}
       {onClose && (
         <div
-          className="bg-foreground text-background hover:bg-error hover:text-error-foreground absolute top-0 right-0"
+          className="bg-foreground text-background hover:bg-error hover:text-error-foreground absolute top-0 right-0 z-10"
           onClick={onClose}
         >
           <XIcon className="size-5 cursor-pointer" />
